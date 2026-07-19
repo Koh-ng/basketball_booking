@@ -1,9 +1,7 @@
 import { db } from "@/db";
 import { events, members, votes } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { formatMonthVN } from "@/lib/dates";
 import { isEventFinished } from "@/lib/events";
-import { formatVND } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
@@ -46,19 +44,6 @@ export default async function StatsPage() {
     (a, b) => b.sessions - a.sessions || a.name.localeCompare(b.name),
   );
 
-  const perMonth = new Map<string, { sessions: number; cost: number }>();
-  for (const e of finished) {
-    const month = e.eventDate.slice(0, 7);
-    const entry = perMonth.get(month) ?? { sessions: 0, cost: 0 };
-    entry.sessions += 1;
-    entry.cost += e.totalCost ?? 0;
-    perMonth.set(month, entry);
-  }
-  const months = [...perMonth.entries()].sort((a, b) =>
-    b[0].localeCompare(a[0]),
-  );
-
-  const totalCost = finished.reduce((sum, e) => sum + (e.totalCost ?? 0), 0);
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
@@ -68,23 +53,6 @@ export default async function StatsPage() {
       </h1>
 
       <div className="rounded-2xl border border-ink/8 bg-white p-4">
-        <p className="text-[13px] font-semibold text-ink/65">
-          Đã chơi <b className="text-ink">{finished.length} buổi</b> · Tổng chi{" "}
-          <b className="text-ink">{formatVND(totalCost)}</b>
-          {finished.length > 0 && (
-            <>
-              {" "}
-              · TB{" "}
-              <b className="text-ink">
-                {formatVND(Math.round(totalCost / finished.length / 1000) * 1000)}
-              </b>
-              /buổi
-            </>
-          )}
-        </p>
-      </div>
-
-      <div className="mt-3.5 rounded-2xl border border-ink/8 bg-white p-4">
         <h2 className="mb-1.5 text-[14px] font-extrabold text-ink">
           🏅 Bảng vàng chuyên cần
         </h2>
@@ -109,30 +77,6 @@ export default async function StatsPage() {
             </span>
             <span className="text-[13px] font-bold text-ink/60">
               {m.sessions} buổi
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-3.5 rounded-2xl border border-ink/8 bg-white p-4">
-        <h2 className="mb-1.5 text-[14px] font-extrabold text-ink">
-          💰 Theo tháng
-        </h2>
-        {months.length === 0 && (
-          <p className="text-[13px] font-semibold text-ink/50">
-            Chưa có dữ liệu.
-          </p>
-        )}
-        {months.map(([month, m]) => (
-          <div
-            key={month}
-            className="flex items-center justify-between border-b border-ink/6 py-2 last:border-b-0"
-          >
-            <span className="text-[13.5px] font-semibold text-ink">
-              {formatMonthVN(`${month}-01`)}
-            </span>
-            <span className="text-[13px] font-semibold text-ink/60">
-              {m.sessions} buổi{m.cost > 0 ? ` · ${formatVND(m.cost)}` : ""}
             </span>
           </div>
         ))}
