@@ -115,14 +115,19 @@ export async function toggleMemberAction(formData: FormData) {
   revalidatePath("/admin/members");
 }
 
-export async function saveSettingsAction(formData: FormData) {
+export async function saveSettingsAction(
+  _prev: { ok: boolean } | null,
+  formData: FormData,
+) {
   await requireAdmin();
   await saveSettings({
     bankCode: String(formData.get("bankCode") ?? "").trim(),
     bankAccountNo: String(formData.get("bankAccountNo") ?? "").trim(),
     bankAccountName: String(formData.get("bankAccountName") ?? "").trim(),
     adminEmail: String(formData.get("adminEmail") ?? "").trim(),
+    qrImage: String(formData.get("qrImage") ?? "").trim(),
   });
   revalidateAll();
   revalidatePath("/admin/settings");
+  return { ok: true };
 }

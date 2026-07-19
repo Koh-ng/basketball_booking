@@ -24,47 +24,57 @@ export function PaymentSection({
   const me = rows.find((r) => r.memberId === memberId) ?? null;
 
   return (
-    <div className="rounded-xl bg-white p-4 shadow-sm border border-zinc-200">
-      <p className="text-sm text-zinc-600">
-        Tổng chi: <b>{totalLabel}</b> · Mỗi người: <b>{perPersonLabel}</b>
+    <div className="rounded-2xl border border-ink/8 bg-white p-4">
+      <p className="text-[13px] font-semibold text-ink/65">
+        Tổng chi: <b className="text-ink">{totalLabel}</b> · Mỗi người:{" "}
+        <b className="text-ink">{perPersonLabel}</b>
       </p>
-      {bankLine && <p className="mt-1 text-sm text-zinc-600">{bankLine}</p>}
+      {bankLine && (
+        <p className="mt-1 text-[12.5px] font-semibold text-ink/50">
+          {bankLine}
+        </p>
+      )}
 
       {me && !me.paid && me.qrUrl && (
-        <div className="mt-4 text-center">
-          <p className="text-sm font-medium mb-2">
+        <div className="mt-3.5 text-center">
+          <p className="mb-2 text-[13px] font-bold text-ink">
             {me.name} ơi, quét QR để chuyển {perPersonLabel} nhé:
           </p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={me.qrUrl}
-            alt="QR chuyển khoản VietQR"
-            className="mx-auto w-56 max-w-full rounded-lg border border-zinc-200"
+            alt="QR chuyển khoản"
+            className="mx-auto block h-[180px] w-[180px] rounded-[14px] border border-ink/8"
           />
         </div>
       )}
       {me && me.paid && (
-        <p className="mt-3 text-sm text-green-700 font-medium">
+        <p className="mt-3 text-[13px] font-bold text-success">
           ✅ {me.name} đã chuyển khoản, cảm ơn bạn!
         </p>
       )}
 
-      <ul className="mt-4 divide-y divide-zinc-100">
+      <div className="mt-3.5 flex flex-col">
         {rows.map((r) => (
-          <li key={r.memberId} className="flex items-center justify-between py-2">
-            <span>{r.name}</span>
+          <div
+            key={r.memberId}
+            className="flex items-center justify-between border-b border-ink/6 py-2 last:border-b-0"
+          >
+            <span className="text-[13.5px] font-semibold text-ink">
+              {r.name}
+            </span>
             {r.paid ? (
-              <span className="text-xs font-semibold text-green-700 bg-green-50 rounded-full px-2.5 py-1">
+              <span className="rounded-full bg-success-bg px-2.5 py-1 text-[11px] font-bold text-success">
                 Đã chuyển ✓
               </span>
             ) : (
-              <span className="text-xs font-semibold text-amber-700 bg-amber-50 rounded-full px-2.5 py-1">
+              <span className="rounded-full bg-amber-bg px-2.5 py-1 text-[11px] font-bold text-amber">
                 Chưa chuyển
               </span>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

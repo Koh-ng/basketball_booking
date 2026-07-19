@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 
-export function CopyButton({ text, label }: { text: string; label: string }) {
+export function CopyButton({
+  text,
+  label,
+  className = "",
+}: {
+  text: string;
+  label: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -24,7 +32,7 @@ export function CopyButton({ text, label }: { text: string; label: string }) {
   return (
     <button
       onClick={copy}
-      className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50 transition"
+      className={`rounded-[10px] bg-brand-soft px-3 py-2.5 text-[12.5px] font-bold whitespace-nowrap text-brand-dark transition hover:brightness-95 ${className}`}
     >
       {copied ? "✓ Đã copy!" : label}
     </button>

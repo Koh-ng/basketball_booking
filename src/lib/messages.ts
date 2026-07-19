@@ -60,8 +60,10 @@ export function paymentReminderMessage(
     lines.push(
       ``,
       `Chuyển khoản: ${settings.bankCode} ${settings.bankAccountNo} (${settings.bankAccountName})`,
-      `Hoặc quét QR trên app: ${appUrl()}`,
     );
+  }
+  if (settings.bankAccountNo || settings.qrImage) {
+    lines.push(`Quét mã QR trên app: ${appUrl()}`);
   }
   if (unpaid.length > 0) {
     lines.push(``, `⏳ Chưa chuyển (${unpaid.length}): ${unpaid.join(", ")}`);

@@ -30,44 +30,47 @@ export default async function HistoryPage() {
     .orderBy(desc(events.eventDate));
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-bold">Lịch sử các kèo</h1>
+    <div>
+      <h1 className="mb-3.5 text-[20px] font-extrabold text-ink">
+        Lịch sử các kèo
+      </h1>
       {rows.length === 0 && (
-        <p className="text-zinc-500">Chưa có kèo nào.</p>
+        <p className="text-[13px] font-semibold text-ink/50">
+          Chưa có kèo nào.
+        </p>
       )}
-      <ul className="space-y-3">
+      <div>
         {rows.map(({ event, goingCount, paidCount }) => (
-          <li key={event.id}>
-            <Link
-              href={`/events/${event.id}`}
-              className="block rounded-xl bg-white p-4 shadow-sm border border-zinc-200 hover:border-orange-400 transition"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">
-                  {formatDateVN(event.eventDate)}
-                </span>
-                <span
-                  className={`text-xs font-semibold rounded-full px-2.5 py-1 ${
-                    event.status === "settled"
-                      ? "bg-green-50 text-green-700"
-                      : event.status === "cancelled"
-                        ? "bg-zinc-100 text-zinc-500"
-                        : "bg-amber-50 text-amber-700"
-                  }`}
-                >
-                  {STATUS_LABEL[event.status]}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-zinc-600">
-                {goingCount} người đi
-                {event.totalCost
-                  ? ` · Tổng chi ${formatVND(event.totalCost)} · Đã thu ${paidCount}/${goingCount}`
-                  : ""}
-              </p>
-            </Link>
-          </li>
+          <Link
+            key={event.id}
+            href={`/events/${event.id}`}
+            className="mb-2.5 block rounded-2xl border border-ink/8 bg-white p-[15px] transition hover:border-brand/40"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[14.5px] font-bold text-ink">
+                {formatDateVN(event.eventDate)}
+              </span>
+              <span
+                className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                  event.status === "settled"
+                    ? "bg-success-bg text-success"
+                    : event.status === "cancelled"
+                      ? "bg-ink/5 text-ink/45"
+                      : "bg-amber-bg text-amber"
+                }`}
+              >
+                {STATUS_LABEL[event.status]}
+              </span>
+            </div>
+            <p className="mt-[5px] text-[12.5px] font-semibold text-ink/55">
+              {goingCount} người đi
+              {event.totalCost
+                ? ` · Tổng chi ${formatVND(event.totalCost)} · Đã thu ${paidCount}/${goingCount}`
+                : ""}
+            </p>
+          </Link>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

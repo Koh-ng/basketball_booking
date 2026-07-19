@@ -22,29 +22,29 @@ function AttendanceList({ data }: { data: EventWithVotes }) {
   const notGoing = data.rows.filter((r) => r.going === false);
   const notVoted = data.rows.filter((r) => r.going === null);
   return (
-    <div className="rounded-xl bg-white p-4 shadow-sm border border-zinc-200 space-y-3">
+    <div className="mt-3.5 flex flex-col gap-3 rounded-2xl border border-ink/8 bg-white p-4">
       <div>
-        <h3 className="text-sm font-semibold text-green-700">
+        <h3 className="text-[13px] font-extrabold text-success">
           ✅ Đi ({going.length})
         </h3>
-        <p className="text-sm text-zinc-700 mt-1">
+        <p className="mt-0.5 text-[13px] font-medium text-ink">
           {going.map((r) => r.member.name).join(", ") || "Chưa có ai"}
         </p>
       </div>
       <div>
-        <h3 className="text-sm font-semibold text-zinc-500">
+        <h3 className="text-[13px] font-extrabold text-ink/45">
           ❌ Không đi ({notGoing.length})
         </h3>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="mt-0.5 text-[13px] font-medium text-ink/55">
           {notGoing.map((r) => r.member.name).join(", ") || "—"}
         </p>
       </div>
       {notVoted.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-amber-600">
+          <h3 className="text-[13px] font-extrabold text-amber">
             ❓ Chưa vote ({notVoted.length})
           </h3>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="mt-0.5 text-[13px] font-medium text-ink/55">
             {notVoted.map((r) => r.member.name).join(", ")}
           </p>
         </div>
@@ -68,6 +68,7 @@ export default async function HomePage() {
       : null;
 
   const bank = bankInfoFrom(settings);
+  const staticQr = settings.qrImage || null;
   let paymentRows: PaymentRowClient[] = [];
   let per = 0;
   if (pastData && pastData.event.totalCost) {
@@ -78,51 +79,60 @@ export default async function HomePage() {
         memberId: r.member.id,
         name: r.member.name,
         paid: r.paid,
-        qrUrl: bank
-          ? vietQrUrl(
-              bank,
-              per,
-              `BongRo ${pastData.event.eventDate} ${r.member.name}`,
-            )
-          : null,
+        qrUrl:
+          staticQr ??
+          (bank
+            ? vietQrUrl(
+                bank,
+                per,
+                `BongRo ${pastData.event.eventDate} ${r.member.name}`,
+              )
+            : null),
       }));
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       {upcomingData && (
-        <section className="space-y-4">
-          <div className="rounded-xl bg-orange-600 text-white p-5 shadow">
-            <p className="text-orange-100 text-sm">Kèo tuần này</p>
-            <h1 className="text-2xl font-bold mt-1">
-              {formatDateVN(upcomingData.event.eventDate)}
-            </h1>
-            <p className="mt-1 text-orange-100">
-              ⏰ {upcomingData.event.startTime}–{upcomingData.event.endTime} ·{" "}
-              {upcomingData.goingCount} người đã chốt đi
-            </p>
-            {upcomingData.event.status === "cancelled" && (
-              <p className="mt-2 rounded bg-white/20 px-2 py-1 text-sm font-semibold">
-                ⚠️ Kèo tuần này đã HỦY
+        <section>
+          <div className="relative overflow-hidden rounded-[22px] bg-[linear-gradient(135deg,var(--color-brand-light),var(--color-brand-light2))] p-5 shadow-[0_12px_24px_-8px_oklch(60%_0.19_42_/_0.4)]">
+            <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(115deg,rgba(255,255,255,0.07)_0_2px,transparent_2px_26px)]" />
+            <div className="relative">
+              <div className="text-[11.5px] font-bold tracking-wide text-white/85 uppercase">
+                Kèo tuần này
+              </div>
+              <h1 className="mt-[5px] text-[23px] font-extrabold text-white">
+                {formatDateVN(upcomingData.event.eventDate)}
+              </h1>
+              <p className="mt-1 text-[13.5px] font-semibold text-white/92">
+                ⏰ {upcomingData.event.startTime}–{upcomingData.event.endTime}{" "}
+                · {upcomingData.goingCount} người đã chốt đi
               </p>
-            )}
-            {upcomingData.event.note && (
-              <p className="mt-2 text-sm text-orange-100">
-                📝 {upcomingData.event.note}
-              </p>
-            )}
+              {upcomingData.event.status === "cancelled" && (
+                <p className="mt-2.5 rounded-lg bg-white/20 px-2.5 py-2 text-[13px] font-bold text-white">
+                  ⚠️ Kèo tuần này đã HỦY
+                </p>
+              )}
+              {upcomingData.event.note && (
+                <p className="mt-2 text-[12.5px] text-white/85">
+                  📝 {upcomingData.event.note}
+                </p>
+              )}
+            </div>
           </div>
 
           {upcomingData.event.status !== "cancelled" && (
-            <VotePanel
-              eventId={upcomingData.event.id}
-              rows={upcomingData.rows.map((r) => ({
-                memberId: r.member.id,
-                name: r.member.name,
-                going: r.going,
-              }))}
-              locked={upcomingData.event.status === "settled"}
-            />
+            <div className="mt-4">
+              <VotePanel
+                eventId={upcomingData.event.id}
+                rows={upcomingData.rows.map((r) => ({
+                  memberId: r.member.id,
+                  name: r.member.name,
+                  going: r.going,
+                }))}
+                locked={upcomingData.event.status === "settled"}
+              />
+            </div>
           )}
 
           <AttendanceList data={upcomingData} />
@@ -130,8 +140,8 @@ export default async function HomePage() {
       )}
 
       {pastData && (
-        <section className="space-y-3">
-          <h2 className="font-bold text-lg">
+        <section className="mt-[22px]">
+          <h2 className="mb-2.5 text-[15px] font-extrabold text-ink">
             💸 Tiền sân {formatDateVN(pastData.event.eventDate)}
           </h2>
           <PaymentSection
