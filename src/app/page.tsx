@@ -13,6 +13,7 @@ import {
 } from "@/lib/events";
 import { formatVND, perPersonAmount } from "@/lib/money";
 import { bankInfoFrom, getSettings } from "@/lib/settings";
+import { VENUE } from "@/lib/venue";
 import { vietQrUrl } from "@/lib/vietqr";
 
 export const dynamic = "force-dynamic";
@@ -115,6 +116,17 @@ export default async function HomePage() {
                 ⏰ {upcomingData.event.startTime}–{upcomingData.event.endTime}{" "}
                 · {upcomingData.headCount} người đã chốt đi
               </p>
+              <a
+                href={VENUE.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1.5 block text-[13px] font-semibold text-white/92 underline decoration-white/40 underline-offset-2"
+              >
+                📍 {VENUE.name}
+                <span className="block text-[11.5px] font-medium text-white/75 no-underline">
+                  {VENUE.address}
+                </span>
+              </a>
               {upcomingData.event.status === "cancelled" && (
                 <p className="mt-2.5 rounded-lg bg-white/20 px-2.5 py-2 text-[13px] font-bold text-white">
                   ⚠️ Kèo tuần này đã HỦY

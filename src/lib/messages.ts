@@ -2,6 +2,7 @@ import type { EventWithVotes } from "./events";
 import { formatDateVN } from "./dates";
 import { formatVND, perPersonAmount } from "./money";
 import type { AppSettings } from "./settings";
+import { VENUE } from "./venue";
 
 function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "";
@@ -22,6 +23,7 @@ export function voteReminderMessage(data: EventWithVotes): string {
     .map((r) => r.member.name);
   const lines = [
     `🏀 KÈO BÓNG RỔ — ${formatDateVN(event.eventDate)}, ${event.startTime}–${event.endTime}`,
+    `📍 ${VENUE.name}: ${VENUE.mapsUrl}`,
     ``,
     `Anh em vào vote để chốt sân nhé: ${appUrl()}`,
     ``,
@@ -43,6 +45,7 @@ export function gameDayMessage(data: EventWithVotes): string {
     `🏀 HÔM NAY CHƠI BÓNG — ${formatDateVN(event.eventDate)}`,
     ``,
     `⏰ ${event.startTime}–${event.endTime}, anh em đến đúng giờ nhé!`,
+    `📍 ${VENUE.name}: ${VENUE.mapsUrl}`,
     ``,
     `Danh sách đi (${headCount}): ${going.join(", ") || "chưa có ai"}`,
   ].join("\n");

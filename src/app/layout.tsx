@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import Link from "next/link";
+import { VENUE } from "@/lib/venue";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -62,7 +63,15 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="px-4 py-4 text-center text-[11.5px] font-bold text-ink/35">
-              Sáng Chủ nhật hàng tuần · 10:00–12:00
+              {VENUE.schedule}
+              <a
+                href={VENUE.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-0.5 block font-semibold text-ink/45 underline decoration-ink/20 underline-offset-2"
+              >
+                📍 {VENUE.name} — {VENUE.address}
+              </a>
             </footer>
           </div>
         </div>
