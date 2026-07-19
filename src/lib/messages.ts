@@ -9,20 +9,25 @@ function appUrl(): string {
 }
 
 /** Tin nhắn nhắc vote (thứ 6) — dán vào group Messenger. */
-function nameWithGuests(name: string, guests: number): string {
-  return guests > 0 ? `${name} (+${guests})` : name;
+function nameWithGuests(
+  name: string,
+  guests: number,
+  guestNames: string | null,
+): string {
+  if (guests <= 0) return name;
+  return `${name} (+${guests}${guestNames ? `: ${guestNames}` : ""})`;
 }
 
 export function voteReminderMessage(data: EventWithVotes): string {
   const { event, rows, headCount } = data;
   const going = rows
     .filter((r) => r.going === true)
-    .map((r) => nameWithGuests(r.member.name, r.guests));
+    .map((r) => nameWithGuests(r.member.name, r.guests, r.guestNames));
   const notVoted = rows
     .filter((r) => r.going === null)
     .map((r) => r.member.name);
   const lines = [
-    `🏀 KÈO BÓNG RỔ — ${formatDateVN(event.eventDate)}, ${event.startTime}–${event.endTime}`,
+    `🏀 BÓNG RỔ CHỦ NHẬT — ${formatDateVN(event.eventDate)}, ${event.startTime}–${event.endTime}`,
     `📍 ${VENUE.name}: ${VENUE.mapsUrl}`,
     ``,
     `Anh em vào vote để chốt sân nhé: ${appUrl()}`,
@@ -40,7 +45,7 @@ export function gameDayMessage(data: EventWithVotes): string {
   const { event, rows, headCount } = data;
   const going = rows
     .filter((r) => r.going === true)
-    .map((r) => nameWithGuests(r.member.name, r.guests));
+    .map((r) => nameWithGuests(r.member.name, r.guests, r.guestNames));
   return [
     `🏀 HÔM NAY CHƠI BÓNG — ${formatDateVN(event.eventDate)}`,
     ``,
@@ -51,7 +56,7 @@ export function gameDayMessage(data: EventWithVotes): string {
   ].join("\n");
 }
 
-/** Tin nhắn nhắc chuyển khoản cho kèo đã chốt tiền. */
+/** Tin nhắn nhắc chuyển khoản cho buổi đã chốt tiền. */
 export function paymentReminderMessage(
   data: EventWithVotes,
   settings: AppSettings,

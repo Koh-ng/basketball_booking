@@ -15,6 +15,13 @@
       "when": 1784453433466,
       "tag": "0001_add_guests",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784466223504,
+      "tag": "0002_guest_names",
+      "breakpoints": true
     }
   ]
 }

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { CopyButton } from "@/components/CopyButton";
 import { requireAdmin } from "@/lib/auth";
-import { formatDateVN } from "@/lib/dates";
+import { formatDateShort, formatDateVN } from "@/lib/dates";
 import {
   ensureUpcomingEvent,
   getEventVotes,
   getLatestPastEvent,
+  getOutstandingDebts,
   getUpcomingEvent,
 } from "@/lib/events";
 import {
@@ -37,6 +38,7 @@ export default async function AdminPage() {
   ]);
   const upcomingData = upcoming ? await getEventVotes(upcoming) : null;
   const pastData = pastEvent ? await getEventVotes(pastEvent) : null;
+  const debts = await getOutstandingDebts();
 
   return (
     <div>
@@ -68,7 +70,7 @@ export default async function AdminPage() {
         <section className="rounded-2xl border border-ink/8 bg-white p-4">
           <div className="mb-2.5 flex items-center justify-between">
             <h2 className="text-[14.5px] font-extrabold text-ink">
-              Kèo sắp tới — {formatDateVN(upcomingData.event.eventDate)}
+              Buổi sắp tới — {formatDateVN(upcomingData.event.eventDate)}
             </h2>
             <span className="text-[12.5px] font-semibold text-ink/50">
               {upcomingData.headCount} người đi
@@ -78,7 +80,7 @@ export default async function AdminPage() {
           {upcomingData.event.status === "cancelled" ? (
             <div className="space-y-2.5">
               <p className="text-[13px] font-bold text-ink/50">
-                ⚠️ Kèo này đã hủy
+                ⚠️ Buổi này đã hủy
               </p>
               <form action={cancelEventAction}>
                 <input
@@ -88,7 +90,7 @@ export default async function AdminPage() {
                 />
                 <input type="hidden" name="cancel" value="false" />
                 <button className="rounded-[10px] border border-ink/15 bg-white px-3 py-2.5 text-[12.5px] font-bold text-ink hover:bg-ink/3">
-                  Mở lại kèo
+                  Mở lại buổi
                 </button>
               </form>
             </div>
@@ -113,7 +115,7 @@ export default async function AdminPage() {
                   />
                   <input type="hidden" name="cancel" value="true" />
                   <button className="w-full rounded-[10px] border border-danger-border bg-danger-bg px-3 py-2.5 text-[12.5px] font-bold text-danger">
-                    Hủy kèo tuần này
+                    Hủy buổi tuần này
                   </button>
                 </form>
               </div>
@@ -149,7 +151,7 @@ export default async function AdminPage() {
             <>
               {pastData.goingCount === 0 ? (
                 <p className="text-[13px] font-semibold text-ink/50">
-                  Kèo này không có ai đăng ký đi nên không cần chia tiền.
+                  Buổi này không có ai đăng ký đi nên không cần chia tiền.
                 </p>
               ) : (
                 <form action={settleEventAction} className="space-y-2">
@@ -270,6 +272,40 @@ export default async function AdminPage() {
               </div>
             </>
           )}
+        </section>
+      )}
+
+      {debts.length > 0 && (
+        <section className="mt-3.5 rounded-2xl border border-ink/8 bg-white p-4">
+          <h2 className="mb-1 text-[14.5px] font-extrabold text-ink">
+            💳 Công nợ
+          </h2>
+          <p className="mb-1.5 text-[11.5px] font-semibold text-ink/40">
+            Tiền chưa chuyển, gộp từ mọi buổi đã chốt.
+          </p>
+          {debts.map((d) => (
+            <div
+              key={d.member.id}
+              className="border-b border-ink/6 py-2 last:border-b-0"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[13.5px] font-semibold text-ink">
+                  {d.member.name}
+                </span>
+                <span className="text-[13px] font-extrabold text-danger">
+                  {formatVND(d.total)}
+                </span>
+              </div>
+              <p className="mt-0.5 text-[11.5px] font-semibold text-ink/40">
+                {d.items
+                  .map(
+                    (it) =>
+                      `${formatDateShort(it.eventDate)}: ${formatVND(it.amount)}`,
+                  )
+                  .join(" · ")}
+              </p>
+            </div>
+          ))}
         </section>
       )}
     </div>
