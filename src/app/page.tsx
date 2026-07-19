@@ -1,8 +1,4 @@
 import { VotePanel } from "@/components/VotePanel";
-import {
-  PaymentSection,
-  type PaymentRowClient,
-} from "@/components/PaymentSection";
 import Link from "next/link";
 import { formatDateShort, formatDateVN } from "@/lib/dates";
 import { googleCalendarUrl } from "@/lib/calendar";
@@ -14,10 +10,8 @@ import {
   getUpcomingEvent,
   type EventWithVotes,
 } from "@/lib/events";
-import { formatVND, perPersonAmount } from "@/lib/money";
-import { bankInfoFrom, getSettings } from "@/lib/settings";
+import { formatVND } from "@/lib/money";
 import { VENUE } from "@/lib/venue";
-import { vietQrUrl } from "@/lib/vietqr";
 
 export const dynamic = "force-dynamic";
 
@@ -68,10 +62,9 @@ function AttendanceList({ data }: { data: EventWithVotes }) {
 
 export default async function HomePage() {
   await ensureMonthEvents();
-  const [upcoming, pastEvent, settings] = await Promise.all([
+  const [upcoming, pastEvent] = await Promise.all([
     getUpcomingEvent(),
     getLatestPastEvent(),
-    getSettings(),
   ]);
 
   const upcomingData = upcoming ? await getEventVotes(upcoming) : null;
@@ -80,38 +73,13 @@ export default async function HomePage() {
         (e) => e.status === "open",
       )
     : [];
-  const pastData =
+  // Buổi vừa rồi đã chốt tiền -> dẫn sang trang buổi đó để quét QR
+  const payableEvent =
     pastEvent &&
     (pastEvent.status === "settled" || pastEvent.status === "completed") &&
     pastEvent.totalCost != null
-      ? await getEventVotes(pastEvent)
+      ? pastEvent
       : null;
-
-  const bank = bankInfoFrom(settings);
-  const staticQr = settings.qrImage || null;
-  let paymentRows: PaymentRowClient[] = [];
-  let per = 0;
-  if (pastData && pastData.event.totalCost) {
-    per = perPersonAmount(pastData.event.totalCost, pastData.headCount);
-    paymentRows = pastData.rows
-      .filter((r) => r.going === true)
-      .map((r) => ({
-        memberId: r.member.id,
-        name: r.member.name,
-        guests: r.guests,
-        amountLabel: formatVND(per * (1 + r.guests)),
-        paid: r.paid,
-        qrUrl:
-          staticQr ??
-          (bank
-            ? vietQrUrl(
-                bank,
-                per * (1 + r.guests),
-                `BongRo ${pastData.event.eventDate} ${r.member.name}`,
-              )
-            : null),
-      }));
-  }
 
   return (
     <div>
@@ -208,21 +176,20 @@ export default async function HomePage() {
         </section>
       )}
 
-      {pastData && (
+      {payableEvent && (
         <section className="mt-[22px]">
-          <h2 className="mb-2.5 text-[15px] font-extrabold text-ink">
-            💸 Tiền sân {formatDateVN(pastData.event.eventDate)}
-          </h2>
-          <PaymentSection
-            rows={paymentRows}
-            totalLabel={formatVND(pastData.event.totalCost ?? 0)}
-            perPersonLabel={formatVND(per)}
-            bankLine={
-              bank
-                ? `CK: ${bank.bankCode} ${bank.accountNo} (${bank.accountName})`
-                : null
-            }
-          />
+          <Link
+            href={`/events/${payableEvent.id}`}
+            className="block rounded-2xl border border-amber-border bg-amber-bg p-4 transition hover:brightness-[0.98] active:scale-[0.99]"
+          >
+            <p className="text-[14px] font-extrabold text-ink">
+              💸 Tiền sân {formatDateVN(payableEvent.eventDate)}
+            </p>
+            <p className="mt-1 text-[12.5px] font-semibold text-ink/60">
+              Tổng chi {formatVND(payableEvent.totalCost ?? 0)} · Bấm để xem
+              QR &amp; chuyển khoản →
+            </p>
+          </Link>
         </section>
       )}
     </div>

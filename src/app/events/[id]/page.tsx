@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  PaymentSection,
+  type PaymentRowClient,
+} from "@/components/PaymentSection";
 import { VotePanel } from "@/components/VotePanel";
 import { googleCalendarUrl } from "@/lib/calendar";
 import { formatDateVN } from "@/lib/dates";
 import { getEventById, getEventVotes, isEventFinished } from "@/lib/events";
 import { formatVND, perPersonAmount } from "@/lib/money";
+import { bankInfoFrom, getSettings } from "@/lib/settings";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
+import { vietQrUrl } from "@/lib/vietqr";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +31,37 @@ export default async function EventDetailPage({
     : 0;
   // Buổi chưa diễn ra và còn mở -> cho vote trước ngay tại đây
   const votable = event.status === "open" && !isEventFinished(event);
+
+  // Buổi đã chốt tiền -> hiện QR chuyển khoản ngay tại trang này
+  const payable =
+    (event.status === "settled" || event.status === "completed") &&
+    event.totalCost != null;
+  let paymentRows: PaymentRowClient[] = [];
+  let bankLine: string | null = null;
+  if (payable) {
+    const settings = await getSettings();
+    const bank = bankInfoFrom(settings);
+    const staticQr = settings.qrImage || null;
+    bankLine = bank
+      ? `CK: ${bank.bankCode} ${bank.accountNo} (${bank.accountName})`
+      : null;
+    paymentRows = going.map((r) => ({
+      memberId: r.member.id,
+      name: r.member.name,
+      guests: r.guests,
+      amountLabel: formatVND(per * (1 + r.guests)),
+      paid: r.paid,
+      qrUrl:
+        staticQr ??
+        (bank
+          ? vietQrUrl(
+              bank,
+              per * (1 + r.guests),
+              `BongRo ${event.eventDate} ${r.member.name}`,
+            )
+          : null),
+    }));
+  }
 
   return (
     <div>
@@ -76,6 +113,20 @@ export default async function EventDetailPage({
           </div>
         )}
       </div>
+
+      {payable && (
+        <div className="mt-3.5">
+          <h2 className="mb-2 text-[15px] font-extrabold text-ink">
+            💸 Tiền sân
+          </h2>
+          <PaymentSection
+            rows={paymentRows}
+            totalLabel={formatVND(event.totalCost ?? 0)}
+            perPersonLabel={formatVND(per)}
+            bankLine={bankLine}
+          />
+        </div>
+      )}
 
       {votable && (
         <div className="mt-3.5">
