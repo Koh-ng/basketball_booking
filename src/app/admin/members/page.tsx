@@ -2,7 +2,8 @@ import Link from "next/link";
 import { db } from "@/db";
 import { members } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
-import { addMemberAction, toggleMemberAction } from "../actions";
+import { addMemberAction } from "../actions";
+import { MemberRow } from "./MemberRow";
 
 export const dynamic = "force-dynamic";
 
@@ -37,27 +38,7 @@ export default async function MembersPage() {
 
       <div className="overflow-hidden rounded-2xl border border-ink/8 bg-white">
         {allMembers.map((m) => (
-          <div
-            key={m.id}
-            className="flex items-center justify-between border-b border-ink/6 px-3.5 py-3 last:border-b-0"
-          >
-            <span
-              className={`text-sm font-semibold ${m.active ? "text-ink" : "text-ink/35 line-through"}`}
-            >
-              {m.name}
-            </span>
-            <form action={toggleMemberAction}>
-              <input type="hidden" name="memberId" value={m.id} />
-              <input
-                type="hidden"
-                name="active"
-                value={m.active ? "false" : "true"}
-              />
-              <button className="rounded-[10px] border border-ink/15 bg-white px-3 py-1.5 text-[11.5px] font-bold text-ink hover:bg-ink/3">
-                {m.active ? "Ẩn khỏi danh sách" : "Kích hoạt lại"}
-              </button>
-            </form>
-          </div>
+          <MemberRow key={m.id} member={m} />
         ))}
         {allMembers.length === 0 && (
           <div className="px-3.5 py-3 text-[13px] font-semibold text-ink/50">

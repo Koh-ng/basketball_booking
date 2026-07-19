@@ -105,6 +105,31 @@ export async function addMemberAction(formData: FormData) {
   revalidatePath("/admin/members");
 }
 
+export async function renameMemberAction(
+  _prev: { ok: boolean; error?: string } | null,
+  formData: FormData,
+) {
+  await requireAdmin();
+  const memberId = Number(formData.get("memberId"));
+  const name = String(formData.get("name") ?? "").trim();
+  if (!memberId) return { ok: false, error: "Thiếu thành viên" };
+  if (!name) return { ok: false, error: "Tên không được để trống" };
+
+  const existing = await db
+    .select()
+    .from(members)
+    .where(eq(members.name, name))
+    .limit(1);
+  if (existing[0] && existing[0].id !== memberId) {
+    return { ok: false, error: "Đã có thành viên tên này rồi" };
+  }
+
+  await db.update(members).set({ name }).where(eq(members.id, memberId));
+  revalidateAll();
+  revalidatePath("/admin/members");
+  return { ok: true };
+}
+
 export async function toggleMemberAction(formData: FormData) {
   await requireAdmin();
   const memberId = Number(formData.get("memberId"));
