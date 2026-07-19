@@ -1,7 +1,13 @@
 import { db } from "@/db";
 import { events, members, votes, type Event, type Member } from "@/db/schema";
-import { and, desc, eq, lt } from "drizzle-orm";
-import { remainingSundaysOfMonth, upcomingSunday, vnToday } from "./dates";
+import { and, desc, eq, lte } from "drizzle-orm";
+import {
+  addDays,
+  remainingSundaysOfMonth,
+  upcomingSunday,
+  vnTimeHM,
+  vnToday,
+} from "./dates";
 
 export type VoteRow = {
   member: Member;
@@ -34,24 +40,50 @@ export async function ensureMonthEvents(): Promise<void> {
     .onConflictDoNothing({ target: events.eventDate });
 }
 
+/**
+ * Kèo đã kết thúc chưa, theo giờ thực tế VN:
+ * ngày đã qua, hoặc hôm nay nhưng đã quá giờ kết thúc.
+ */
+export function isEventFinished(ev: Event): boolean {
+  const today = vnToday();
+  if (ev.eventDate < today) return true;
+  return ev.eventDate === today && vnTimeHM() >= ev.endTime;
+}
+
 export async function getUpcomingEvent(): Promise<Event | null> {
+  const date = upcomingSunday();
   const rows = await db
     .select()
     .from(events)
-    .where(eq(events.eventDate, upcomingSunday()))
+    .where(eq(events.eventDate, date))
     .limit(1);
-  return rows[0] ?? null;
+  const ev = rows[0] ?? null;
+  // Kèo hôm nay đã đá xong -> kèo sắp tới là Chủ nhật tuần sau
+  if (ev && isEventFinished(ev)) {
+    const nextDate = addDays(date, 7);
+    await db
+      .insert(events)
+      .values({ eventDate: nextDate })
+      .onConflictDoNothing({ target: events.eventDate });
+    const next = await db
+      .select()
+      .from(events)
+      .where(eq(events.eventDate, nextDate))
+      .limit(1);
+    return next[0] ?? null;
+  }
+  return ev;
 }
 
-/** Kèo gần nhất đã qua (để chốt tiền / nhắc chuyển khoản). */
+/** Kèo gần nhất đã kết thúc (để chốt tiền / nhắc chuyển khoản). */
 export async function getLatestPastEvent(): Promise<Event | null> {
   const rows = await db
     .select()
     .from(events)
-    .where(lt(events.eventDate, vnToday()))
+    .where(lte(events.eventDate, vnToday()))
     .orderBy(desc(events.eventDate))
-    .limit(1);
-  return rows[0] ?? null;
+    .limit(2);
+  return rows.find(isEventFinished) ?? null;
 }
 
 export async function getEventById(id: number): Promise<Event | null> {
