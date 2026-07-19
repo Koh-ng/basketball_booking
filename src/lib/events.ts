@@ -6,13 +6,16 @@ import { upcomingSunday, vnToday } from "./dates";
 export type VoteRow = {
   member: Member;
   going: boolean | null; // null = chưa vote
+  guests: number; // số khách đi kèm
   paid: boolean;
 };
 
 export type EventWithVotes = {
   event: Event;
   rows: VoteRow[];
-  goingCount: number;
+  goingCount: number; // số thành viên chốt đi
+  guestCount: number; // tổng số khách đi kèm
+  headCount: number; // goingCount + guestCount
 };
 
 /** Đảm bảo luôn tồn tại kèo cho Chủ nhật sắp tới (idempotent). */
@@ -62,12 +65,21 @@ export async function getEventVotes(event: Event): Promise<EventWithVotes> {
     .filter((m) => m.active || voteByMember.has(m.id))
     .map((m) => {
       const v = voteByMember.get(m.id);
-      return { member: m, going: v ? v.going : null, paid: v?.paid ?? false };
+      return {
+        member: m,
+        going: v ? v.going : null,
+        guests: v?.going ? v.guests : 0,
+        paid: v?.paid ?? false,
+      };
     });
+  const goingCount = rows.filter((r) => r.going === true).length;
+  const guestCount = rows.reduce((sum, r) => sum + r.guests, 0);
   return {
     event,
     rows,
-    goingCount: rows.filter((r) => r.going === true).length,
+    goingCount,
+    guestCount,
+    headCount: goingCount + guestCount,
   };
 }
 
@@ -75,13 +87,14 @@ export async function castVote(
   eventId: number,
   memberId: number,
   going: boolean,
+  guests: number,
 ) {
   await db
     .insert(votes)
-    .values({ eventId, memberId, going })
+    .values({ eventId, memberId, going, guests })
     .onConflictDoUpdate({
       target: [votes.eventId, votes.memberId],
-      set: { going, updatedAt: new Date() },
+      set: { going, guests, updatedAt: new Date() },
     });
 }
 

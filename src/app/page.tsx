@@ -25,10 +25,15 @@ function AttendanceList({ data }: { data: EventWithVotes }) {
     <div className="mt-3.5 flex flex-col gap-3 rounded-2xl border border-ink/8 bg-white p-4">
       <div>
         <h3 className="text-[13px] font-extrabold text-success">
-          ✅ Đi ({going.length})
+          ✅ Đi ({data.headCount})
         </h3>
         <p className="mt-0.5 text-[13px] font-medium text-ink">
-          {going.map((r) => r.member.name).join(", ") || "Chưa có ai"}
+          {going
+            .map(
+              (r) =>
+                `${r.member.name}${r.guests > 0 ? ` (+${r.guests})` : ""}`,
+            )
+            .join(", ") || "Chưa có ai"}
         </p>
       </div>
       <div>
@@ -72,19 +77,21 @@ export default async function HomePage() {
   let paymentRows: PaymentRowClient[] = [];
   let per = 0;
   if (pastData && pastData.event.totalCost) {
-    per = perPersonAmount(pastData.event.totalCost, pastData.goingCount);
+    per = perPersonAmount(pastData.event.totalCost, pastData.headCount);
     paymentRows = pastData.rows
       .filter((r) => r.going === true)
       .map((r) => ({
         memberId: r.member.id,
         name: r.member.name,
+        guests: r.guests,
+        amountLabel: formatVND(per * (1 + r.guests)),
         paid: r.paid,
         qrUrl:
           staticQr ??
           (bank
             ? vietQrUrl(
                 bank,
-                per,
+                per * (1 + r.guests),
                 `BongRo ${pastData.event.eventDate} ${r.member.name}`,
               )
             : null),
@@ -106,7 +113,7 @@ export default async function HomePage() {
               </h1>
               <p className="mt-1 text-[13.5px] font-semibold text-white/92">
                 ⏰ {upcomingData.event.startTime}–{upcomingData.event.endTime}{" "}
-                · {upcomingData.goingCount} người đã chốt đi
+                · {upcomingData.headCount} người đã chốt đi
               </p>
               {upcomingData.event.status === "cancelled" && (
                 <p className="mt-2.5 rounded-lg bg-white/20 px-2.5 py-2 text-[13px] font-bold text-white">
@@ -129,6 +136,7 @@ export default async function HomePage() {
                   memberId: r.member.id,
                   name: r.member.name,
                   going: r.going,
+                  guests: r.guests,
                 }))}
                 locked={upcomingData.event.status === "settled"}
               />

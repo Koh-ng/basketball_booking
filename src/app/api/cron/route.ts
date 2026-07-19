@@ -50,9 +50,9 @@ export async function GET(req: NextRequest) {
       const data = await getEventVotes(event);
       const sent = await sendAdminEmail(
         adminEmail,
-        `🏀 Nhắc vote kèo bóng rổ Chủ nhật (đã có ${data.goingCount} người)`,
+        `🏀 Nhắc vote kèo bóng rổ Chủ nhật (đã có ${data.headCount} người)`,
         [
-          `Hiện có ${data.goingCount} người chốt đi. Nhớ book sân và trả tiền trước nhé!`,
+          `Hiện có ${data.headCount} người chốt đi. Nhớ book sân và trả tiền trước nhé!`,
           ``,
           `Tin nhắn soạn sẵn để dán vào group Messenger:`,
           `----------`,
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
       const data = await getEventVotes(event);
       const sent = await sendAdminEmail(
         adminEmail,
-        `🏀 Hôm nay chơi bóng ${event.startTime} (${data.goingCount} người đi)`,
+        `🏀 Hôm nay chơi bóng ${event.startTime} (${data.headCount} người đi)`,
         [
           `Sáng nay chơi bóng lúc ${event.startTime}–${event.endTime}.`,
           ``,

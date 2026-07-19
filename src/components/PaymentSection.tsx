@@ -5,6 +5,8 @@ import { useSelectedMember } from "./useSelectedMember";
 export type PaymentRowClient = {
   memberId: number;
   name: string;
+  guests: number;
+  amountLabel: string;
   paid: boolean;
   qrUrl: string | null;
 };
@@ -38,7 +40,8 @@ export function PaymentSection({
       {me && !me.paid && me.qrUrl && (
         <div className="mt-3.5 text-center">
           <p className="mb-2 text-[13px] font-bold text-ink">
-            {me.name} ơi, quét QR để chuyển {perPersonLabel} nhé:
+            {me.name} ơi, quét QR để chuyển {me.amountLabel}
+            {me.guests > 0 ? ` (bạn + ${me.guests} khách)` : ""} nhé:
           </p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -62,6 +65,12 @@ export function PaymentSection({
           >
             <span className="text-[13.5px] font-semibold text-ink">
               {r.name}
+              {r.guests > 0 && (
+                <span className="font-medium text-ink/50">
+                  {" "}
+                  (+{r.guests}) · {r.amountLabel}
+                </span>
+              )}
             </span>
             {r.paid ? (
               <span className="rounded-full bg-success-bg px-2.5 py-1 text-[11px] font-bold text-success">
