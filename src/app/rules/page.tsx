@@ -4,7 +4,7 @@ export const metadata = {
 
 const RULES = [
   "Anh em vui vẻ lành mạnh, không hơn thua cạnh tranh",
-  "Không bạo lực, chửi thề hơn thua khi chơi",
+  "Khi chơi không bạo lực, xô xát, cố ý đẩy hay chơi lỗi, nếu xảy ra cãi nhau sẽ bị cấm chơi",
   "Nếu dẫn người quen thì hãy chủ động rủ những người match vibe anh em trong hội",
   "Đi lâu dài thì add Facebook, add group trên Messenger",
   "Báo trước nếu không đi thường xuyên hoặc nghỉ hẳn",
