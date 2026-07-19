@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
-import { formatDateVN, vnToday } from "@/lib/dates";
-import { getEventById, getEventVotes } from "@/lib/events";
+import { formatDateVN } from "@/lib/dates";
+import { getEventById, getEventVotes, isEventFinished } from "@/lib/events";
 import { getSettings } from "@/lib/settings";
 import { EventAdminPanel } from "../../EventAdminPanel";
 
@@ -40,7 +40,7 @@ export default async function AdminEventDetailPage({
       <EventAdminPanel
         data={data}
         settings={settings}
-        showVoteReminders={event.eventDate >= vnToday()}
+        showVoteReminders={!isEventFinished(event)}
       />
     </div>
   );

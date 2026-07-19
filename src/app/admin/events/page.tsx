@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { formatDateVN } from "@/lib/dates";
-import { listEventsSummary } from "@/lib/events";
+import { ensureMonthEvents, listEventsSummary } from "@/lib/events";
 import { formatVND } from "@/lib/money";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 import { CreateEventForm } from "./CreateEventForm";
@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminEventsPage() {
   await requireAdmin();
+  await ensureMonthEvents();
   const rows = await listEventsSummary();
 
   return (
