@@ -18,13 +18,15 @@ export const members = pgTable("members", {
     .defaultNow(),
 });
 
-// Một "buổi" chơi bóng. status: open -> settled | cancelled
+// Một "buổi" chơi bóng. status: open -> settled -> completed, hoặc open -> cancelled
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   eventDate: date("event_date").notNull().unique(),
   startTime: text("start_time").notNull().default("10:00"),
   endTime: text("end_time").notNull().default("12:00"),
-  status: text("status", { enum: ["open", "settled", "cancelled"] })
+  status: text("status", {
+    enum: ["open", "settled", "completed", "cancelled"],
+  })
     .notNull()
     .default("open"),
   totalCost: integer("total_cost"),

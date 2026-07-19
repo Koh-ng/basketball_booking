@@ -81,7 +81,9 @@ export default async function HomePage() {
       )
     : [];
   const pastData =
-    pastEvent && pastEvent.status === "settled"
+    pastEvent &&
+    (pastEvent.status === "settled" || pastEvent.status === "completed") &&
+    pastEvent.totalCost != null
       ? await getEventVotes(pastEvent)
       : null;
 
@@ -175,7 +177,10 @@ export default async function HomePage() {
                   guests: r.guests,
                   guestNames: r.guestNames,
                 }))}
-                locked={upcomingData.event.status === "settled"}
+                locked={
+                  upcomingData.event.status === "settled" ||
+                  upcomingData.event.status === "completed"
+                }
               />
             </div>
           )}

@@ -13,11 +13,24 @@ import {
 } from "@/lib/auth";
 import { setPaid } from "@/lib/events";
 import { saveSettings } from "@/lib/settings";
+import type { EventStatus } from "@/lib/status";
 
-function revalidateAll() {
+const EVENT_STATUSES: readonly EventStatus[] = [
+  "open",
+  "settled",
+  "completed",
+  "cancelled",
+];
+
+function revalidateAll(eventId?: number) {
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/history");
+  revalidatePath("/admin/events");
+  if (eventId) {
+    revalidatePath(`/admin/events/${eventId}`);
+    revalidatePath(`/events/${eventId}`);
+  }
 }
 
 export async function loginAction(
@@ -48,7 +61,7 @@ export async function settleEventAction(formData: FormData) {
     .update(events)
     .set({ totalCost, status: "settled" })
     .where(eq(events.id, eventId));
-  revalidateAll();
+  revalidateAll(eventId);
 }
 
 export async function unsettleEventAction(formData: FormData) {
@@ -59,7 +72,7 @@ export async function unsettleEventAction(formData: FormData) {
     .update(events)
     .set({ totalCost: null, status: "open" })
     .where(eq(events.id, eventId));
-  revalidateAll();
+  revalidateAll(eventId);
 }
 
 export async function togglePaidAction(formData: FormData) {
@@ -69,19 +82,17 @@ export async function togglePaidAction(formData: FormData) {
   const paid = formData.get("paid") === "true";
   if (!eventId || !memberId) return;
   await setPaid(eventId, memberId, paid);
-  revalidateAll();
+  revalidateAll(eventId);
 }
 
-export async function cancelEventAction(formData: FormData) {
+/** Chuyển trạng thái buổi: mở lại (open), kết thúc (completed), hoặc hủy (cancelled). */
+export async function setEventStatusAction(formData: FormData) {
   await requireAdmin();
   const eventId = Number(formData.get("eventId"));
-  const cancel = formData.get("cancel") === "true";
-  if (!eventId) return;
-  await db
-    .update(events)
-    .set({ status: cancel ? "cancelled" : "open" })
-    .where(eq(events.id, eventId));
-  revalidateAll();
+  const status = String(formData.get("status") ?? "") as EventStatus;
+  if (!eventId || !EVENT_STATUSES.includes(status)) return;
+  await db.update(events).set({ status }).where(eq(events.id, eventId));
+  revalidateAll(eventId);
 }
 
 export async function updateNoteAction(formData: FormData) {
@@ -93,7 +104,34 @@ export async function updateNoteAction(formData: FormData) {
     .update(events)
     .set({ note: note || null })
     .where(eq(events.id, eventId));
-  revalidateAll();
+  revalidateAll(eventId);
+}
+
+/** Admin tự tạo buổi mới cho một ngày bất kỳ (ngoài lịch Chủ nhật tự động). */
+export async function createEventAction(
+  _prev: { ok: boolean; error?: string } | null,
+  formData: FormData,
+) {
+  await requireAdmin();
+  const eventDate = String(formData.get("eventDate") ?? "").trim();
+  const note = String(formData.get("note") ?? "").trim();
+  if (!eventDate) return { ok: false, error: "Chọn ngày cho buổi mới" };
+
+  const existing = await db
+    .select({ id: events.id })
+    .from(events)
+    .where(eq(events.eventDate, eventDate))
+    .limit(1);
+  if (existing[0]) {
+    return { ok: false, error: "Đã có buổi vào ngày này rồi" };
+  }
+
+  const [created] = await db
+    .insert(events)
+    .values({ eventDate, note: note || null })
+    .returning({ id: events.id });
+  revalidateAll(created.id);
+  redirect(`/admin/events/${created.id}`);
 }
 
 export async function addMemberAction(formData: FormData) {
