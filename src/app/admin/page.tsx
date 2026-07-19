@@ -68,7 +68,7 @@ export default async function AdminPage() {
         <section className="rounded-2xl border border-ink/8 bg-white p-4">
           <div className="mb-2.5 flex items-center justify-between">
             <h2 className="text-[14.5px] font-extrabold text-ink">
-              Kèo tuần này — {formatDateVN(upcomingData.event.eventDate)}
+              Kèo sắp tới — {formatDateVN(upcomingData.event.eventDate)}
             </h2>
             <span className="text-[12.5px] font-semibold text-ink/50">
               {upcomingData.headCount} người đi

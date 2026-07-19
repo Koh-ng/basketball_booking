@@ -34,9 +34,9 @@ export default function RootLayout({
             <header className="sticky top-0 z-10 flex items-center justify-between bg-[linear-gradient(120deg,var(--color-brand),var(--color-brand-dark))] px-[18px] py-3.5">
               <Link
                 href="/"
-                className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm font-extrabold text-white"
+                className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/25 bg-white/15 px-3.5 py-1.5 text-sm font-extrabold text-white transition hover:bg-white/25 active:scale-95"
               >
-                🏀 Bóng Rổ CN
+                🏀 UI
               </Link>
               <nav className="flex shrink-0 gap-3.5">
                 <Link
