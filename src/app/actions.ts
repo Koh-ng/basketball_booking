@@ -14,7 +14,7 @@ export async function voteAction(
   if (!event || event.status === "cancelled") {
     return { ok: false, error: "Buổi không tồn tại hoặc đã hủy" };
   }
-  if (event.status === "settled") {
+  if (event.status === "settled" || event.status === "completed") {
     return { ok: false, error: "Buổi đã chốt tiền, không đổi vote được nữa" };
   }
   const safeGuests = going

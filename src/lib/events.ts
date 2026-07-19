@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { events, members, votes, type Event, type Member } from "@/db/schema";
-import { and, desc, eq, gt, lte } from "drizzle-orm";
+import { and, desc, eq, gt, lt, lte, or, sql } from "drizzle-orm";
 import {
   addDays,
   remainingSundaysOfMonth,
@@ -167,7 +167,7 @@ export async function getOutstandingDebts(): Promise<MemberDebt[]> {
   const settled = await db
     .select()
     .from(events)
-    .where(eq(events.status, "settled"))
+    .where(or(eq(events.status, "settled"), eq(events.status, "completed")))
     .orderBy(desc(events.eventDate));
   const byMember = new Map<number, MemberDebt>();
   for (const ev of settled) {
@@ -212,4 +212,44 @@ export async function autoCancelEvent(ev: Event, headCount: number) {
     .update(events)
     .set({ status: "cancelled", note: ev.note ? `${ev.note} · ${reason}` : reason })
     .where(eq(events.id, ev.id));
+}
+
+export type EventSummary = {
+  event: Event;
+  goingCount: number;
+  guestCount: number;
+  paidCount: number;
+};
+
+/** Danh sách mọi buổi kèm số liệu tổng hợp — dùng cho trang Lịch sử và Admin. */
+export async function listEventsSummary(): Promise<EventSummary[]> {
+  return db
+    .select({
+      event: events,
+      goingCount: sql<number>`count(*) filter (where ${votes.going})`.mapWith(
+        Number,
+      ),
+      guestCount:
+        sql<number>`coalesce(sum(${votes.guests}) filter (where ${votes.going}), 0)`.mapWith(
+          Number,
+        ),
+      paidCount:
+        sql<number>`count(*) filter (where ${votes.going} and ${votes.paid})`.mapWith(
+          Number,
+        ),
+    })
+    .from(events)
+    .leftJoin(votes, eq(votes.eventId, events.id))
+    .groupBy(events.id)
+    .orderBy(desc(events.eventDate));
+}
+
+/** Xoá vĩnh viễn các buổi đã hủy quá 30 ngày. Trả về số buổi đã xoá. */
+export async function deleteOldCancelledEvents(): Promise<number> {
+  const cutoff = addDays(vnToday(), -30);
+  const deleted = await db
+    .delete(events)
+    .where(and(eq(events.status, "cancelled"), lt(events.eventDate, cutoff)))
+    .returning({ id: events.id });
+  return deleted.length;
 }

@@ -1,10 +1,13 @@
 import Link from "next/link";
-import { db } from "@/db";
-import { events, votes, type Event } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import type { Event } from "@/db/schema";
 import { formatDateVN, formatMonthVN } from "@/lib/dates";
-import { ensureMonthEvents, isEventFinished } from "@/lib/events";
+import {
+  ensureMonthEvents,
+  isEventFinished,
+  listEventsSummary,
+} from "@/lib/events";
 import { formatVND } from "@/lib/money";
+import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
 
@@ -23,14 +26,20 @@ function EventCard({
   upcoming: boolean;
 }) {
   const { event, goingCount, guestCount, paidCount } = row;
+  // "open" tách thành 2 sắc thái tuỳ đã tới ngày hay chưa; các trạng thái
+  // khác (settled/completed/cancelled) dùng nhãn/màu dùng chung.
   const statusLabel =
-    event.status === "settled"
-      ? "Đã chốt tiền"
-      : event.status === "cancelled"
-        ? "Đã hủy"
-        : upcoming
-          ? "Sắp tới"
-          : "Chờ chốt tiền";
+    event.status === "open"
+      ? upcoming
+        ? "Sắp tới"
+        : "Chờ chốt tiền"
+      : STATUS_LABEL[event.status];
+  const statusBadge =
+    event.status === "open"
+      ? upcoming
+        ? "bg-brand-soft text-brand"
+        : "bg-amber-bg text-amber"
+      : STATUS_BADGE[event.status];
   return (
     <Link
       href={`/events/${event.id}`}
@@ -41,15 +50,7 @@ function EventCard({
           {formatDateVN(event.eventDate)}
         </span>
         <span
-          className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
-            event.status === "settled"
-              ? "bg-success-bg text-success"
-              : event.status === "cancelled"
-                ? "bg-ink/5 text-ink/45"
-                : upcoming
-                  ? "bg-brand-soft text-brand"
-                  : "bg-amber-bg text-amber"
-          }`}
+          className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${statusBadge}`}
         >
           {statusLabel}
         </span>
@@ -96,23 +97,7 @@ function MonthGroups({
 export default async function HistoryPage() {
   await ensureMonthEvents();
 
-  const rows: HistoryRow[] = await db
-    .select({
-      event: events,
-      goingCount: sql<number>`count(*) filter (where ${votes.going})`.mapWith(
-        Number,
-      ),
-      guestCount: sql<number>`coalesce(sum(${votes.guests}) filter (where ${votes.going}), 0)`.mapWith(
-        Number,
-      ),
-      paidCount: sql<number>`count(*) filter (where ${votes.going} and ${votes.paid})`.mapWith(
-        Number,
-      ),
-    })
-    .from(events)
-    .leftJoin(votes, eq(votes.eventId, events.id))
-    .groupBy(events.id)
-    .orderBy(desc(events.eventDate));
+  const rows = await listEventsSummary();
 
   // Tính theo giờ thực tế VN: buổi hôm nay đã quá giờ kết thúc là "đã qua"
   // Buổi sắp tới: gần nhất trên đầu, các Chủ nhật sau xếp dần xuống dưới

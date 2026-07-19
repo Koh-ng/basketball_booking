@@ -5,6 +5,7 @@ import { googleCalendarUrl } from "@/lib/calendar";
 import { formatDateVN } from "@/lib/dates";
 import { getEventById, getEventVotes, isEventFinished } from "@/lib/events";
 import { formatVND, perPersonAmount } from "@/lib/money";
+import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +35,16 @@ export default async function EventDetailPage({
         ← Lịch sử
       </Link>
       <div className="rounded-2xl border border-ink/8 bg-white p-4">
-        <h1 className="text-[19px] font-extrabold text-ink">
-          {formatDateVN(event.eventDate)}
-        </h1>
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-[19px] font-extrabold text-ink">
+            {formatDateVN(event.eventDate)}
+          </h1>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${STATUS_BADGE[event.status]}`}
+          >
+            {STATUS_LABEL[event.status]}
+          </span>
+        </div>
         <p className="mt-1 text-[13px] font-semibold text-ink/60">
           ⏰ {event.startTime}–{event.endTime}
         </p>
@@ -110,7 +118,9 @@ export default async function EventDetailPage({
                   </span>
                 )}
               </span>
-              {event.status === "settled" &&
+              {(event.status === "settled" ||
+                event.status === "completed") &&
+                event.totalCost != null &&
                 (r.paid ? (
                   <span className="rounded-full bg-success-bg px-2.5 py-1 text-[11px] font-bold text-success">
                     Đã chuyển ✓

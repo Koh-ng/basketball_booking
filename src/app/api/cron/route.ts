@@ -3,6 +3,7 @@ import { vnWeekday } from "@/lib/dates";
 import { sendAdminEmail } from "@/lib/email";
 import {
   autoCancelEvent,
+  deleteOldCancelledEvents,
   ensureUpcomingEvent,
   getEventVotes,
   getLatestPastEvent,
@@ -22,6 +23,7 @@ export const dynamic = "force-dynamic";
  * Cron chạy MỖI NGÀY lúc 01:00 UTC = 8:00 sáng VN (vercel.json).
  * Tự quyết định việc theo thứ trong tuần (giờ VN):
  *  - Hàng ngày: đảm bảo tồn tại buổi cho Chủ nhật sắp tới
+ *  - Hàng ngày: xoá vĩnh viễn các buổi đã hủy quá 30 ngày
  *  - Thứ 6: email nhắc admin đăng tin vote + book sân
  *  - Chủ nhật: email nhắc giờ chơi (8h sáng, chơi lúc 10h)
  *  - Thứ 3: email nhắc thu tiền nếu còn người chưa chuyển khoản
@@ -40,10 +42,14 @@ export async function GET(req: NextRequest) {
       : vnWeekday();
 
   await ensureUpcomingEvent();
+  const deletedCount = await deleteOldCancelledEvents();
 
   const settings = await getSettings();
   const adminEmail = settings.adminEmail || process.env.ADMIN_EMAIL || "";
-  const actions: string[] = ["ensured upcoming event"];
+  const actions: string[] = [
+    "ensured upcoming event",
+    `deleted ${deletedCount} old cancelled event(s)`,
+  ];
 
   if (weekday === 5) {
     // Thứ 6: nhắc vote + book sân
