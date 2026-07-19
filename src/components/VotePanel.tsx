@@ -35,12 +35,12 @@ export function VotePanel({
   };
 
   return (
-    <div className="rounded-xl bg-white p-4 shadow-sm border border-zinc-200">
-      <label className="block text-sm font-medium text-zinc-600 mb-2">
+    <div className="rounded-2xl border border-ink/8 bg-white p-4">
+      <label className="mb-2 block text-[13px] font-bold text-ink/60">
         Bạn là ai?
       </label>
       <select
-        className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 bg-white"
+        className="w-full rounded-[10px] border border-ink/15 bg-white px-3 py-2.5 text-sm font-semibold text-ink"
         value={memberId ?? ""}
         onChange={(e) =>
           setMemberId(e.target.value ? Number(e.target.value) : null)
@@ -55,26 +55,26 @@ export function VotePanel({
       </select>
 
       {selected && !locked && (
-        <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-2.5">
           <button
             onClick={() => vote(true)}
             disabled={pending}
-            className={`rounded-lg py-3 font-semibold transition ${
+            className={`rounded-xl py-3.5 text-[14.5px] font-extrabold transition disabled:opacity-50 ${
               selected.going === true
-                ? "bg-green-600 text-white"
-                : "bg-green-50 text-green-700 border border-green-300 hover:bg-green-100"
-            } disabled:opacity-50`}
+                ? "border-[1.5px] border-success bg-success-bg text-success"
+                : "border-[1.5px] border-success/25 bg-white text-success"
+            }`}
           >
             ✅ Đi
           </button>
           <button
             onClick={() => vote(false)}
             disabled={pending}
-            className={`rounded-lg py-3 font-semibold transition ${
+            className={`rounded-xl py-3.5 text-[14.5px] font-extrabold transition disabled:opacity-50 ${
               selected.going === false
-                ? "bg-zinc-600 text-white"
-                : "bg-zinc-50 text-zinc-600 border border-zinc-300 hover:bg-zinc-100"
-            } disabled:opacity-50`}
+                ? "border-[1.5px] border-ink/40 bg-ink/8 text-ink/60"
+                : "border-[1.5px] border-ink/15 bg-white text-ink/60"
+            }`}
           >
             ❌ Không đi
           </button>
@@ -82,19 +82,26 @@ export function VotePanel({
       )}
 
       {selected && locked && (
-        <p className="mt-3 text-sm text-zinc-500">
+        <p className="mt-3 text-[12.5px] font-semibold text-ink/50">
           Kèo này đã chốt, không vote được nữa.
         </p>
       )}
 
       {selected && selected.going !== null && !locked && (
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-[12.5px] font-semibold text-ink/50">
           Vote hiện tại của bạn:{" "}
-          <b>{selected.going ? "Đi ✅" : "Không đi ❌"}</b> (bấm nút để đổi)
+          <b className="text-ink">
+            {selected.going ? "Đi ✅" : "Không đi ❌"}
+          </b>{" "}
+          (bấm nút để đổi)
         </p>
       )}
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="mt-2 text-[12.5px] font-semibold text-danger">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

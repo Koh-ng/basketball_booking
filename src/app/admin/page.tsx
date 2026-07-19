@@ -39,45 +39,45 @@ export default async function AdminPage() {
   const pastData = pastEvent ? await getEventVotes(pastEvent) : null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Trang quản lý</h1>
+    <div>
+      <div className="mb-3.5 flex items-center justify-between">
+        <h1 className="text-[20px] font-extrabold text-ink">Trang quản lý</h1>
         <form action={logoutAction}>
-          <button className="text-sm text-zinc-500 hover:text-zinc-800 underline">
+          <button className="text-[13px] font-bold text-ink/50 hover:text-ink">
             Đăng xuất
           </button>
         </form>
       </div>
 
-      <nav className="flex gap-3">
+      <nav className="mb-4 flex gap-2.5">
         <Link
           href="/admin/members"
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+          className="flex-1 rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
         >
           👥 Thành viên
         </Link>
         <Link
           href="/admin/settings"
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium hover:bg-zinc-50"
+          className="flex-1 rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
         >
           ⚙️ Cài đặt
         </Link>
       </nav>
 
       {upcomingData && (
-        <section className="rounded-xl bg-white p-4 shadow-sm border border-zinc-200 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-bold">
+        <section className="rounded-2xl border border-ink/8 bg-white p-4">
+          <div className="mb-2.5 flex items-center justify-between">
+            <h2 className="text-[14.5px] font-extrabold text-ink">
               Kèo tuần này — {formatDateVN(upcomingData.event.eventDate)}
             </h2>
-            <span className="text-sm text-zinc-500">
+            <span className="text-[12.5px] font-semibold text-ink/50">
               {upcomingData.goingCount} người đi
             </span>
           </div>
 
           {upcomingData.event.status === "cancelled" ? (
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-zinc-500">
+            <div className="space-y-2.5">
+              <p className="text-[13px] font-bold text-ink/50">
                 ⚠️ Kèo này đã hủy
               </p>
               <form action={cancelEventAction}>
@@ -87,19 +87,21 @@ export default async function AdminPage() {
                   value={upcomingData.event.id}
                 />
                 <input type="hidden" name="cancel" value="false" />
-                <button className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50">
+                <button className="rounded-[10px] border border-ink/15 bg-white px-3 py-2.5 text-[12.5px] font-bold text-ink hover:bg-ink/3">
                   Mở lại kèo
                 </button>
               </form>
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap gap-2">
+              <div className="mb-2.5 flex flex-col gap-2">
                 <CopyButton
+                  className="w-full"
                   label="📋 Copy tin nhắc vote"
                   text={voteReminderMessage(upcomingData)}
                 />
                 <CopyButton
+                  className="w-full"
                   label="📋 Copy tin nhắc giờ chơi"
                   text={gameDayMessage(upcomingData)}
                 />
@@ -110,12 +112,12 @@ export default async function AdminPage() {
                     value={upcomingData.event.id}
                   />
                   <input type="hidden" name="cancel" value="true" />
-                  <button className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-3 py-2 text-sm font-medium hover:bg-red-100">
+                  <button className="w-full rounded-[10px] border border-danger-border bg-danger-bg px-3 py-2.5 text-[12.5px] font-bold text-danger">
                     Hủy kèo tuần này
                   </button>
                 </form>
               </div>
-              <p className="text-xs text-zinc-400">
+              <p className="mb-2.5 text-[11.5px] font-semibold text-ink/40">
                 Copy tin nhắn rồi dán vào group Messenger của đội.
               </p>
             </>
@@ -128,9 +130,9 @@ export default async function AdminPage() {
               name="note"
               defaultValue={upcomingData.event.note ?? ""}
               placeholder="Ghi chú (sân, lưu ý...)"
-              className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+              className="flex-1 rounded-[10px] border border-ink/15 px-3 py-2.5 text-[13px]"
             />
-            <button className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50">
+            <button className="rounded-[10px] border border-ink/15 bg-white px-3.5 text-[12.5px] font-bold text-ink hover:bg-ink/3">
               Lưu
             </button>
           </form>
@@ -138,25 +140,25 @@ export default async function AdminPage() {
       )}
 
       {pastData && pastData.event.status !== "cancelled" && (
-        <section className="rounded-xl bg-white p-4 shadow-sm border border-zinc-200 space-y-4">
-          <h2 className="font-bold">
+        <section className="mt-3.5 rounded-2xl border border-ink/8 bg-white p-4">
+          <h2 className="mb-2.5 text-[14.5px] font-extrabold text-ink">
             💸 Tiền sân — {formatDateVN(pastData.event.eventDate)}
           </h2>
 
           {pastData.event.status === "open" && (
             <>
               {pastData.goingCount === 0 ? (
-                <p className="text-sm text-zinc-500">
+                <p className="text-[13px] font-semibold text-ink/50">
                   Kèo này không có ai đăng ký đi nên không cần chia tiền.
                 </p>
               ) : (
-                <form action={settleEventAction} className="space-y-3">
+                <form action={settleEventAction} className="space-y-2">
                   <input
                     type="hidden"
                     name="eventId"
                     value={pastData.event.id}
                   />
-                  <label className="block text-sm text-zinc-600">
+                  <label className="block text-[12.5px] font-semibold text-ink/60">
                     Nhập tổng chi phí bạn đã trả (tiền sân, nước...) để chia đều
                     cho {pastData.goingCount} người đi:
                   </label>
@@ -166,9 +168,9 @@ export default async function AdminPage() {
                       name="totalCost"
                       inputMode="numeric"
                       placeholder="VD: 500000"
-                      className="flex-1 rounded-lg border border-zinc-300 px-3 py-2"
+                      className="flex-1 rounded-[10px] border border-ink/15 px-3 py-2.5 text-[13px]"
                     />
-                    <button className="rounded-lg bg-orange-600 text-white px-4 py-2 font-semibold hover:bg-orange-700">
+                    <button className="rounded-[10px] bg-brand px-4 text-[13px] font-extrabold text-white hover:brightness-95">
                       Chốt chia tiền
                     </button>
                   </div>
@@ -179,10 +181,11 @@ export default async function AdminPage() {
 
           {pastData.event.status === "settled" && pastData.event.totalCost && (
             <>
-              <p className="text-sm text-zinc-600">
-                Tổng chi <b>{formatVND(pastData.event.totalCost)}</b> /{" "}
-                {pastData.goingCount} người ={" "}
-                <b>
+              <p className="mb-2 text-[13px] font-semibold text-ink/65">
+                Tổng chi{" "}
+                <b className="text-ink">{formatVND(pastData.event.totalCost)}</b>{" "}
+                / {pastData.goingCount} người ={" "}
+                <b className="text-ink">
                   {formatVND(
                     perPersonAmount(
                       pastData.event.totalCost,
@@ -193,15 +196,17 @@ export default async function AdminPage() {
                 /người
               </p>
 
-              <ul className="divide-y divide-zinc-100">
+              <div>
                 {pastData.rows
                   .filter((r) => r.going === true)
                   .map((r) => (
-                    <li
+                    <div
                       key={r.member.id}
-                      className="flex items-center justify-between py-2"
+                      className="flex items-center justify-between border-b border-ink/6 py-[7px] last:border-b-0"
                     >
-                      <span>{r.member.name}</span>
+                      <span className="text-[13.5px] font-semibold text-ink">
+                        {r.member.name}
+                      </span>
                       <form action={togglePaidAction}>
                         <input
                           type="hidden"
@@ -219,20 +224,22 @@ export default async function AdminPage() {
                           value={r.paid ? "false" : "true"}
                         />
                         <button
-                          className={`text-xs font-semibold rounded-full px-3 py-1.5 border transition ${
+                          className={`rounded-full border px-[11px] py-[5px] text-[11px] font-bold transition ${
                             r.paid
-                              ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                              : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                              ? "border-success-border bg-success-bg text-success"
+                              : "border-amber-border bg-amber-bg text-amber"
                           }`}
                         >
-                          {r.paid ? "Đã chuyển ✓ (bấm để bỏ)" : "Chưa chuyển (bấm khi đã nhận)"}
+                          {r.paid
+                            ? "Đã chuyển ✓ (bấm để bỏ)"
+                            : "Chưa chuyển (bấm khi đã nhận)"}
                         </button>
                       </form>
-                    </li>
+                    </div>
                   ))}
-              </ul>
+              </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <CopyButton
                   label="📋 Copy tin nhắc chuyển khoản"
                   text={paymentReminderMessage(pastData, settings)}
@@ -243,7 +250,7 @@ export default async function AdminPage() {
                     name="eventId"
                     value={pastData.event.id}
                   />
-                  <button className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50">
+                  <button className="rounded-[10px] border border-ink/15 bg-white px-3 py-2.5 text-[12.5px] font-bold text-ink hover:bg-ink/3">
                     Sửa lại tổng chi phí
                   </button>
                 </form>

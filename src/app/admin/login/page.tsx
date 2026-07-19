@@ -7,27 +7,28 @@ export default function AdminLoginPage() {
   const [state, formAction, pending] = useActionState(loginAction, null);
 
   return (
-    <div className="max-w-sm mx-auto mt-10">
-      <form
-        action={formAction}
-        className="rounded-xl bg-white p-6 shadow-sm border border-zinc-200 space-y-4"
-      >
-        <h1 className="text-lg font-bold">🔐 Đăng nhập quản lý</h1>
+    <div className="mx-auto mt-10 max-w-[320px] rounded-[18px] border border-ink/8 bg-white p-[22px]">
+      <form action={formAction}>
+        <h1 className="mb-3.5 text-[17px] font-extrabold text-ink">
+          🔐 Đăng nhập quản lý
+        </h1>
         <input
           type="password"
           name="pin"
           inputMode="numeric"
           placeholder="Nhập mã PIN"
           autoFocus
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2.5"
+          className="w-full rounded-[10px] border border-ink/15 px-3 py-[11px] text-sm"
         />
         {state?.error && (
-          <p className="text-sm text-red-600">{state.error}</p>
+          <p className="mt-2 text-[12.5px] font-bold text-danger">
+            {state.error}
+          </p>
         )}
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-lg bg-orange-600 text-white py-2.5 font-semibold hover:bg-orange-700 transition disabled:opacity-50"
+          className="mt-3.5 w-full rounded-xl bg-brand py-3 text-[14.5px] font-extrabold text-white transition hover:brightness-95 disabled:opacity-50"
         >
           {pending ? "Đang kiểm tra..." : "Đăng nhập"}
         </button>

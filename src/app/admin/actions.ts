@@ -115,7 +115,10 @@ export async function toggleMemberAction(formData: FormData) {
   revalidatePath("/admin/members");
 }
 
-export async function saveSettingsAction(formData: FormData) {
+export async function saveSettingsAction(
+  _prev: { ok: boolean } | null,
+  formData: FormData,
+) {
   await requireAdmin();
   await saveSettings({
     bankCode: String(formData.get("bankCode") ?? "").trim(),
@@ -125,4 +128,5 @@ export async function saveSettingsAction(formData: FormData) {
   });
   revalidateAll();
   revalidatePath("/admin/settings");
+  return { ok: true };
 }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDateVN } from "@/lib/dates";
 import { getEventById, getEventVotes } from "@/lib/events";
@@ -21,53 +22,68 @@ export default async function EventDetailPage({
     : 0;
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl bg-white p-5 shadow-sm border border-zinc-200">
-        <h1 className="text-xl font-bold">{formatDateVN(event.eventDate)}</h1>
-        <p className="mt-1 text-zinc-600">
+    <div>
+      <Link
+        href="/history"
+        className="mb-3.5 inline-block text-[13px] font-bold text-ink/50"
+      >
+        ← Lịch sử
+      </Link>
+      <div className="rounded-2xl border border-ink/8 bg-white p-4">
+        <h1 className="text-[19px] font-extrabold text-ink">
+          {formatDateVN(event.eventDate)}
+        </h1>
+        <p className="mt-1 text-[13px] font-semibold text-ink/60">
           ⏰ {event.startTime}–{event.endTime}
         </p>
         {event.status === "cancelled" && (
-          <p className="mt-2 text-sm font-semibold text-zinc-500">
+          <p className="mt-2 text-[13px] font-bold text-ink/45">
             ⚠️ Kèo này đã hủy
           </p>
         )}
         {event.note && (
-          <p className="mt-2 text-sm text-zinc-500">📝 {event.note}</p>
+          <p className="mt-2 text-[12.5px] text-ink/55">📝 {event.note}</p>
         )}
         {event.totalCost != null && (
-          <p className="mt-2 text-sm text-zinc-600">
-            Tổng chi <b>{formatVND(event.totalCost)}</b> / {data.goingCount}{" "}
-            người = <b>{formatVND(per)}</b>/người
+          <p className="mt-2 text-[13px] font-semibold text-ink/65">
+            Tổng chi <b className="text-ink">{formatVND(event.totalCost)}</b>{" "}
+            / {data.goingCount} người ={" "}
+            <b className="text-ink">{formatVND(per)}</b>/người
           </p>
         )}
       </div>
 
-      <div className="rounded-xl bg-white p-4 shadow-sm border border-zinc-200">
-        <h2 className="font-semibold mb-2">Người đi ({going.length})</h2>
+      <div className="mt-3.5 rounded-2xl border border-ink/8 bg-white p-4">
+        <h2 className="mb-2 text-[14px] font-extrabold text-ink">
+          Người đi ({going.length})
+        </h2>
         {going.length === 0 && (
-          <p className="text-sm text-zinc-500">Không có ai tham gia.</p>
+          <p className="text-[13px] font-semibold text-ink/50">
+            Không có ai tham gia.
+          </p>
         )}
-        <ul className="divide-y divide-zinc-100">
+        <div>
           {going.map((r) => (
-            <li
+            <div
               key={r.member.id}
-              className="flex items-center justify-between py-2"
+              className="flex items-center justify-between border-b border-ink/6 py-2 last:border-b-0"
             >
-              <span>{r.member.name}</span>
+              <span className="text-[13.5px] font-semibold text-ink">
+                {r.member.name}
+              </span>
               {event.status === "settled" &&
                 (r.paid ? (
-                  <span className="text-xs font-semibold text-green-700 bg-green-50 rounded-full px-2.5 py-1">
+                  <span className="rounded-full bg-success-bg px-2.5 py-1 text-[11px] font-bold text-success">
                     Đã chuyển ✓
                   </span>
                 ) : (
-                  <span className="text-xs font-semibold text-amber-700 bg-amber-50 rounded-full px-2.5 py-1">
+                  <span className="rounded-full bg-amber-bg px-2.5 py-1 text-[11px] font-bold text-amber">
                     Chưa chuyển
                   </span>
                 ))}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
