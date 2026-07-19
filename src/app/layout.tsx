@@ -73,6 +73,10 @@ export default function RootLayout({
               >
                 📍 {VENUE.name} — {VENUE.address}
               </a>
+              <p className="mt-2 font-semibold text-ink/30">
+                Built by @xuanbach02 &amp; @koh.nguyen for the boys 🏀
+                <span className="block">© Copyright reserved</span>
+              </p>
             </footer>
           </div>
         </div>
