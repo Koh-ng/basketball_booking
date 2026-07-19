@@ -45,6 +45,12 @@ export default function RootLayout({
                   Lịch sử
                 </Link>
                 <Link
+                  href="/rules"
+                  className="whitespace-nowrap text-[13px] font-bold text-white/92"
+                >
+                  Luật
+                </Link>
+                <Link
                   href="/admin"
                   className="whitespace-nowrap text-[13px] font-bold text-white/92"
                 >

@@ -1,0 +1,42 @@
+export const metadata = {
+  title: "Luật — Bóng Rổ Chủ Nhật",
+};
+
+const RULES = [
+  "Anh em vui vẻ lành mạnh, không hơn thua cạnh tranh",
+  "Không bạo lực, chửi thề hơn thua khi chơi",
+  "Nếu dẫn người quen thì hãy chủ động rủ những người match vibe anh em trong hội",
+  "Đi lâu dài thì add Facebook, add group trên Messenger",
+  "Báo trước nếu không đi thường xuyên hoặc nghỉ hẳn",
+  "Nếu không đi thì nên cập nhật 1 ngày trước buổi chơi",
+];
+
+export default function RulesPage() {
+  return (
+    <div>
+      <h1 className="mb-3.5 text-[20px] font-extrabold text-ink">
+        📜 Luật của hội
+      </h1>
+      <div className="rounded-2xl border border-ink/8 bg-white p-4">
+        <ol className="flex flex-col">
+          {RULES.map((rule, i) => (
+            <li
+              key={i}
+              className="flex gap-3 border-b border-ink/6 py-3 first:pt-1 last:border-b-0 last:pb-1"
+            >
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[12px] font-extrabold text-brand">
+                {i + 1}
+              </span>
+              <span className="text-[13.5px] leading-relaxed font-semibold text-ink">
+                {rule}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <p className="mt-3 text-center text-[12.5px] font-semibold text-ink/45">
+        Chơi đẹp, vui là chính 🏀
+      </p>
+    </div>
+  );
+}
