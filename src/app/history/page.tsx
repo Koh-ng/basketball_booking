@@ -2,8 +2,8 @@ import Link from "next/link";
 import { db } from "@/db";
 import { events, votes, type Event } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
-import { formatDateVN, formatMonthVN, vnToday } from "@/lib/dates";
-import { ensureMonthEvents } from "@/lib/events";
+import { formatDateVN, formatMonthVN } from "@/lib/dates";
+import { ensureMonthEvents, isEventFinished } from "@/lib/events";
 import { formatVND } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +30,7 @@ function EventCard({
         ? "Đã hủy"
         : upcoming
           ? "Sắp tới"
-          : "Đang mở";
+          : "Chờ chốt tiền";
   return (
     <Link
       href={`/events/${event.id}`}
@@ -114,13 +114,13 @@ export default async function HistoryPage() {
     .groupBy(events.id)
     .orderBy(desc(events.eventDate));
 
-  const today = vnToday();
+  // Tính theo giờ thực tế VN: kèo hôm nay đã quá giờ kết thúc là "đã qua"
   // Kèo sắp tới: gần nhất trên đầu, các Chủ nhật sau xếp dần xuống dưới
   const upcoming = rows
-    .filter((r) => r.event.eventDate >= today)
+    .filter((r) => !isEventFinished(r.event))
     .sort((a, b) => a.event.eventDate.localeCompare(b.event.eventDate));
   // Kèo đã qua: giữ nguyên dữ liệu, mới nhất trước, nhóm theo tháng
-  const past = rows.filter((r) => r.event.eventDate < today);
+  const past = rows.filter((r) => isEventFinished(r.event));
 
   return (
     <div>

@@ -5,6 +5,16 @@ export function vnToday(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
 }
 
+/** Giờ hiện tại theo giờ VN dạng "HH:mm" (24h), so sánh được với start/end time. */
+export function vnTimeHM(): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date());
+}
+
 /** Thứ trong tuần theo giờ VN: 0 = Chủ nhật ... 6 = Thứ bảy */
 export function vnWeekday(): number {
   const name = new Intl.DateTimeFormat("en-US", {
