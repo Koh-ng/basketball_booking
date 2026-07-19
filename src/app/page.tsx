@@ -107,7 +107,7 @@ export default async function HomePage() {
             <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(115deg,rgba(255,255,255,0.07)_0_2px,transparent_2px_26px)]" />
             <div className="relative">
               <div className="text-[11.5px] font-bold tracking-wide text-white/85 uppercase">
-                Kèo tuần này
+                Kèo sắp tới
               </div>
               <h1 className="mt-[5px] text-[23px] font-extrabold text-white">
                 {formatDateVN(upcomingData.event.eventDate)}
