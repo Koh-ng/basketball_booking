@@ -18,7 +18,7 @@ export default async function EventDetailPage({
   const data = await getEventVotes(event);
   const going = data.rows.filter((r) => r.going === true);
   const per = event.totalCost
-    ? perPersonAmount(event.totalCost, data.goingCount)
+    ? perPersonAmount(event.totalCost, data.headCount)
     : 0;
 
   return (
@@ -47,7 +47,7 @@ export default async function EventDetailPage({
         {event.totalCost != null && (
           <p className="mt-2 text-[13px] font-semibold text-ink/65">
             Tổng chi <b className="text-ink">{formatVND(event.totalCost)}</b>{" "}
-            / {data.goingCount} người ={" "}
+            / {data.headCount} người ={" "}
             <b className="text-ink">{formatVND(per)}</b>/người
           </p>
         )}
@@ -55,7 +55,7 @@ export default async function EventDetailPage({
 
       <div className="mt-3.5 rounded-2xl border border-ink/8 bg-white p-4">
         <h2 className="mb-2 text-[14px] font-extrabold text-ink">
-          Người đi ({going.length})
+          Người đi ({data.headCount})
         </h2>
         {going.length === 0 && (
           <p className="text-[13px] font-semibold text-ink/50">
@@ -70,6 +70,12 @@ export default async function EventDetailPage({
             >
               <span className="text-[13.5px] font-semibold text-ink">
                 {r.member.name}
+                {r.guests > 0 && (
+                  <span className="font-medium text-ink/50">
+                    {" "}
+                    (+{r.guests} khách)
+                  </span>
+                )}
               </span>
               {event.status === "settled" &&
                 (r.paid ? (

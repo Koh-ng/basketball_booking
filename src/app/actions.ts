@@ -7,6 +7,7 @@ export async function voteAction(
   eventId: number,
   memberId: number,
   going: boolean,
+  guests: number = 0,
 ) {
   const event = await getEventById(eventId);
   if (!event || event.status === "cancelled") {
@@ -15,7 +16,10 @@ export async function voteAction(
   if (event.status === "settled") {
     return { ok: false, error: "Kèo đã chốt tiền, không đổi vote được nữa" };
   }
-  await castVote(eventId, memberId, going);
+  const safeGuests = going
+    ? Math.min(5, Math.max(0, Math.floor(guests) || 0))
+    : 0;
+  await castVote(eventId, memberId, going, safeGuests);
   revalidatePath("/");
   return { ok: true };
 }

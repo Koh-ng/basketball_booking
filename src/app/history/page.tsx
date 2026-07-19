@@ -20,6 +20,9 @@ export default async function HistoryPage() {
       goingCount: sql<number>`count(*) filter (where ${votes.going})`.mapWith(
         Number,
       ),
+      guestCount: sql<number>`coalesce(sum(${votes.guests}) filter (where ${votes.going}), 0)`.mapWith(
+        Number,
+      ),
       paidCount: sql<number>`count(*) filter (where ${votes.going} and ${votes.paid})`.mapWith(
         Number,
       ),
@@ -40,7 +43,7 @@ export default async function HistoryPage() {
         </p>
       )}
       <div>
-        {rows.map(({ event, goingCount, paidCount }) => (
+        {rows.map(({ event, goingCount, guestCount, paidCount }) => (
           <Link
             key={event.id}
             href={`/events/${event.id}`}
@@ -63,7 +66,7 @@ export default async function HistoryPage() {
               </span>
             </div>
             <p className="mt-[5px] text-[12.5px] font-semibold text-ink/55">
-              {goingCount} người đi
+              {goingCount + guestCount} người đi
               {event.totalCost
                 ? ` · Tổng chi ${formatVND(event.totalCost)} · Đã thu ${paidCount}/${goingCount}`
                 : ""}

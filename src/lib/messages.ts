@@ -8,9 +8,15 @@ function appUrl(): string {
 }
 
 /** Tin nhắn nhắc vote (thứ 6) — dán vào group Messenger. */
+function nameWithGuests(name: string, guests: number): string {
+  return guests > 0 ? `${name} (+${guests})` : name;
+}
+
 export function voteReminderMessage(data: EventWithVotes): string {
-  const { event, rows, goingCount } = data;
-  const going = rows.filter((r) => r.going === true).map((r) => r.member.name);
+  const { event, rows, headCount } = data;
+  const going = rows
+    .filter((r) => r.going === true)
+    .map((r) => nameWithGuests(r.member.name, r.guests));
   const notVoted = rows
     .filter((r) => r.going === null)
     .map((r) => r.member.name);
@@ -19,7 +25,7 @@ export function voteReminderMessage(data: EventWithVotes): string {
     ``,
     `Anh em vào vote để chốt sân nhé: ${appUrl()}`,
     ``,
-    `✅ Đã chốt đi (${goingCount}): ${going.join(", ") || "chưa có ai"}`,
+    `✅ Đã chốt đi (${headCount}): ${going.join(", ") || "chưa có ai"}`,
   ];
   if (notVoted.length > 0) {
     lines.push(`❓ Chưa vote: ${notVoted.join(", ")}`);
@@ -29,14 +35,16 @@ export function voteReminderMessage(data: EventWithVotes): string {
 
 /** Tin nhắn nhắc giờ chơi (sáng Chủ nhật). */
 export function gameDayMessage(data: EventWithVotes): string {
-  const { event, rows, goingCount } = data;
-  const going = rows.filter((r) => r.going === true).map((r) => r.member.name);
+  const { event, rows, headCount } = data;
+  const going = rows
+    .filter((r) => r.going === true)
+    .map((r) => nameWithGuests(r.member.name, r.guests));
   return [
     `🏀 HÔM NAY CHƠI BÓNG — ${formatDateVN(event.eventDate)}`,
     ``,
     `⏰ ${event.startTime}–${event.endTime}, anh em đến đúng giờ nhé!`,
     ``,
-    `Danh sách đi (${goingCount}): ${going.join(", ") || "chưa có ai"}`,
+    `Danh sách đi (${headCount}): ${going.join(", ") || "chưa có ai"}`,
   ].join("\n");
 }
 
@@ -45,16 +53,20 @@ export function paymentReminderMessage(
   data: EventWithVotes,
   settings: AppSettings,
 ): string {
-  const { event, rows, goingCount } = data;
+  const { event, rows, headCount } = data;
   const total = event.totalCost ?? 0;
-  const per = perPersonAmount(total, goingCount);
+  const per = perPersonAmount(total, headCount);
   const unpaid = rows
     .filter((r) => r.going === true && !r.paid)
-    .map((r) => r.member.name);
+    .map((r) =>
+      r.guests > 0
+        ? `${r.member.name} (+${r.guests}: ${formatVND(per * (1 + r.guests))})`
+        : r.member.name,
+    );
   const lines = [
     `💸 TIỀN SÂN — ${formatDateVN(event.eventDate)}`,
     ``,
-    `Tổng chi: ${formatVND(total)} / ${goingCount} người = ${formatVND(per)}/người`,
+    `Tổng chi: ${formatVND(total)} / ${headCount} người = ${formatVND(per)}/người`,
   ];
   if (settings.bankAccountNo) {
     lines.push(

@@ -71,7 +71,7 @@ export default async function AdminPage() {
               Kèo tuần này — {formatDateVN(upcomingData.event.eventDate)}
             </h2>
             <span className="text-[12.5px] font-semibold text-ink/50">
-              {upcomingData.goingCount} người đi
+              {upcomingData.headCount} người đi
             </span>
           </div>
 
@@ -160,7 +160,7 @@ export default async function AdminPage() {
                   />
                   <label className="block text-[12.5px] font-semibold text-ink/60">
                     Nhập tổng chi phí bạn đã trả (tiền sân, nước...) để chia đều
-                    cho {pastData.goingCount} người đi:
+                    cho {pastData.headCount} người đi:
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -184,12 +184,12 @@ export default async function AdminPage() {
               <p className="mb-2 text-[13px] font-semibold text-ink/65">
                 Tổng chi{" "}
                 <b className="text-ink">{formatVND(pastData.event.totalCost)}</b>{" "}
-                / {pastData.goingCount} người ={" "}
+                / {pastData.headCount} người ={" "}
                 <b className="text-ink">
                   {formatVND(
                     perPersonAmount(
                       pastData.event.totalCost,
-                      pastData.goingCount,
+                      pastData.headCount,
                     ),
                   )}
                 </b>
@@ -206,6 +206,19 @@ export default async function AdminPage() {
                     >
                       <span className="text-[13.5px] font-semibold text-ink">
                         {r.member.name}
+                        {r.guests > 0 && (
+                          <span className="font-medium text-ink/50">
+                            {" "}
+                            (+{r.guests}) ·{" "}
+                            {formatVND(
+                              perPersonAmount(
+                                pastData.event.totalCost ?? 0,
+                                pastData.headCount,
+                              ) *
+                                (1 + r.guests),
+                            )}
+                          </span>
+                        )}
                       </span>
                       <form action={togglePaidAction}>
                         <input

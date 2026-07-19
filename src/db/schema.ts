@@ -45,6 +45,8 @@ export const votes = pgTable(
       .notNull()
       .references(() => members.id, { onDelete: "cascade" }),
     going: boolean("going").notNull(),
+    // Số khách đi kèm (0-5), chỉ có nghĩa khi going = true
+    guests: integer("guests").notNull().default(0),
     paid: boolean("paid").notNull().default(false),
     paidAt: timestamp("paid_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true })
