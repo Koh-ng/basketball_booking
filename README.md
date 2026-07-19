@@ -23,19 +23,20 @@ npm run dev                   # mở http://localhost:3000
 
 ## Deploy lên Vercel (miễn phí)
 
-1. **Tạo database Neon**: vào [neon.tech](https://neon.tech) → tạo project → copy **pooled connection string** (dạng `postgresql://...-pooler...`)
-2. **Tạo migration**: chạy local `DATABASE_URL=<neon-url> npm run db:migrate` (và `db:seed` nếu muốn)
-3. **Import repo vào Vercel**: [vercel.com/new](https://vercel.com/new) → chọn repo này → khai báo Environment Variables:
+1. **Tạo database Neon**: vào [neon.tech](https://neon.tech) → tạo project → copy **connection string**
+2. **Import repo vào Vercel**: [vercel.com/new](https://vercel.com/new) → chọn repo này → khai báo Environment Variables:
 
    | Biến | Giá trị |
    |---|---|
-   | `DATABASE_URL` | pooled connection string của Neon |
+   | `DATABASE_URL` | connection string của Neon |
    | `ADMIN_PIN` | mã PIN đăng nhập trang `/admin` |
    | `CRON_SECRET` | chuỗi ngẫu nhiên dài (bảo vệ endpoint cron) |
    | `RESEND_API_KEY` | API key từ [resend.com](https://resend.com) (bỏ trống nếu chưa cần email) |
    | `ADMIN_EMAIL` | email của bạn để nhận nhắc nhở |
    | `NEXT_PUBLIC_APP_URL` | URL app sau khi deploy, VD `https://bongro.vercel.app` |
 
+   Bảng (`events`, `members`, `votes`, `settings`) được tự động tạo trong lúc Vercel build (script `vercel-build` chạy `drizzle-kit migrate` trước `next build`) — không cần chạy migration tay.
+3. **Thêm thành viên**: sau khi deploy xong, vào `/admin/members` (đăng nhập bằng `ADMIN_PIN`) để thêm tên từng người trong đội — không cần seed sẵn.
 4. **Cron tự chạy**: `vercel.json` đã khai báo cron mỗi ngày lúc 8h sáng VN — Vercel tự gắn header `Authorization: Bearer $CRON_SECRET`. Cron sẽ:
    - hàng ngày: đảm bảo tồn tại kèo cho Chủ nhật sắp tới
    - thứ 6: email nhắc bạn đăng tin vote + book sân
