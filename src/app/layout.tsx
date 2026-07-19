@@ -41,19 +41,19 @@ export default function RootLayout({
               <nav className="flex shrink-0 gap-3.5">
                 <Link
                   href="/history"
-                  className="whitespace-nowrap text-[13px] font-bold text-white/92"
+                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Lịch sử
                 </Link>
                 <Link
                   href="/rules"
-                  className="whitespace-nowrap text-[13px] font-bold text-white/92"
+                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Luật
                 </Link>
                 <Link
                   href="/admin"
-                  className="whitespace-nowrap text-[13px] font-bold text-white/92"
+                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Quản lý
                 </Link>
