@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { events, members, votes, type Event, type Member } from "@/db/schema";
 import { and, desc, eq, lt } from "drizzle-orm";
-import { upcomingSunday, vnToday } from "./dates";
+import { remainingSundaysOfMonth, upcomingSunday, vnToday } from "./dates";
 
 export type VoteRow = {
   member: Member;
@@ -23,6 +23,14 @@ export async function ensureUpcomingEvent(): Promise<void> {
   await db
     .insert(events)
     .values({ eventDate: upcomingSunday() })
+    .onConflictDoNothing({ target: events.eventDate });
+}
+
+/** Đảm bảo tồn tại kèo cho mọi Chủ nhật còn lại trong tháng (idempotent). */
+export async function ensureMonthEvents(): Promise<void> {
+  await db
+    .insert(events)
+    .values(remainingSundaysOfMonth().map((eventDate) => ({ eventDate })))
     .onConflictDoNothing({ target: events.eventDate });
 }
 
