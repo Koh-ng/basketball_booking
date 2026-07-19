@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { voteAction } from "@/app/actions";
 import { useSelectedMember } from "./useSelectedMember";
 
@@ -10,6 +10,8 @@ export type VoteRowClient = {
   going: boolean | null;
   guests: number;
 };
+
+type OptimisticVote = { memberId: number; going: boolean; guests: number };
 
 export function VotePanel({
   eventId,
@@ -23,14 +25,27 @@ export function VotePanel({
   const [memberId, setMemberId] = useSelectedMember();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Hiển thị vote ngay khi bấm, không chờ server trả lời
+  const [optimisticRows, applyVote] = useOptimistic(
+    rows,
+    (state: VoteRowClient[], v: OptimisticVote) =>
+      state.map((r) =>
+        r.memberId === v.memberId
+          ? { ...r, going: v.going, guests: v.guests }
+          : r,
+      ),
+  );
 
-  const selected = rows.find((r) => r.memberId === memberId) ?? null;
+  const selected =
+    optimisticRows.find((r) => r.memberId === memberId) ?? null;
 
   const vote = (going: boolean, guests: number = 0) => {
     if (!selected) return;
+    const target = selected.memberId;
     setError(null);
     startTransition(async () => {
-      const res = await voteAction(eventId, selected.memberId, going, guests);
+      applyVote({ memberId: target, going, guests });
+      const res = await voteAction(eventId, target, going, guests);
       if (!res.ok) setError(res.error ?? "Có lỗi xảy ra");
     });
   };
@@ -59,22 +74,20 @@ export function VotePanel({
         <div className="mt-3 grid grid-cols-2 gap-2.5">
           <button
             onClick={() => vote(true, selected.guests)}
-            disabled={pending}
-            className={`rounded-xl py-3.5 text-[14.5px] font-extrabold transition disabled:opacity-50 ${
+            className={`rounded-xl border-[1.5px] py-3.5 text-[14.5px] font-extrabold transition-all duration-150 active:scale-[0.96] ${
               selected.going === true
-                ? "border-[1.5px] border-success bg-success-bg text-success"
-                : "border-[1.5px] border-success/25 bg-white text-success"
+                ? "border-success bg-success-bg text-success shadow-[0_2px_10px_-2px_oklch(52%_0.16_152_/_0.35)]"
+                : "border-success/25 bg-white text-success hover:border-success/50 hover:bg-success-bg/40"
             }`}
           >
             ✅ Đi
           </button>
           <button
             onClick={() => vote(false)}
-            disabled={pending}
-            className={`rounded-xl py-3.5 text-[14.5px] font-extrabold transition disabled:opacity-50 ${
+            className={`rounded-xl border-[1.5px] py-3.5 text-[14.5px] font-extrabold transition-all duration-150 active:scale-[0.96] ${
               selected.going === false
-                ? "border-[1.5px] border-ink/40 bg-ink/8 text-ink/60"
-                : "border-[1.5px] border-ink/15 bg-white text-ink/60"
+                ? "border-ink/40 bg-ink/8 text-ink/60"
+                : "border-ink/15 bg-white text-ink/60 hover:border-ink/30 hover:bg-ink/4"
             }`}
           >
             ❌ Không đi
@@ -83,43 +96,42 @@ export function VotePanel({
       )}
 
       {selected && selected.going === true && !locked && (
-        <div className="mt-3 rounded-xl border border-ink/8 bg-ink/2 p-3">
+        <div className="mt-3 animate-rise rounded-xl border border-ink/8 bg-ink/2 p-3">
           <p className="text-[13px] font-bold text-ink/60">
             Bạn có dẫn thêm ai đi không?
           </p>
           <div className="mt-2 grid grid-cols-2 gap-2.5">
             <button
-              onClick={() => vote(true, selected.guests > 0 ? selected.guests : 1)}
-              disabled={pending}
-              className={`rounded-[10px] py-2.5 text-[13px] font-extrabold transition disabled:opacity-50 ${
+              onClick={() =>
+                vote(true, selected.guests > 0 ? selected.guests : 1)
+              }
+              className={`rounded-[10px] border-[1.5px] py-2.5 text-[13px] font-extrabold transition-all duration-150 active:scale-[0.96] ${
                 selected.guests > 0
-                  ? "border-[1.5px] border-success bg-success-bg text-success"
-                  : "border-[1.5px] border-ink/15 bg-white text-ink/60"
+                  ? "border-success bg-success-bg text-success"
+                  : "border-ink/15 bg-white text-ink/60 hover:border-ink/30"
               }`}
             >
               Có
             </button>
             <button
               onClick={() => vote(true, 0)}
-              disabled={pending}
-              className={`rounded-[10px] py-2.5 text-[13px] font-extrabold transition disabled:opacity-50 ${
+              className={`rounded-[10px] border-[1.5px] py-2.5 text-[13px] font-extrabold transition-all duration-150 active:scale-[0.96] ${
                 selected.guests === 0
-                  ? "border-[1.5px] border-ink/40 bg-ink/8 text-ink/60"
-                  : "border-[1.5px] border-ink/15 bg-white text-ink/60"
+                  ? "border-ink/40 bg-ink/8 text-ink/60"
+                  : "border-ink/15 bg-white text-ink/60 hover:border-ink/30"
               }`}
             >
               Không
             </button>
           </div>
           {selected.guests > 0 && (
-            <div className="mt-2.5">
+            <div className="mt-2.5 animate-rise">
               <label className="mb-1.5 block text-[12.5px] font-bold text-ink/60">
                 Bao nhiêu người?
               </label>
               <select
                 className="w-full rounded-[10px] border border-ink/15 bg-white px-3 py-2.5 text-sm font-semibold text-ink"
                 value={selected.guests}
-                disabled={pending}
                 onChange={(e) => vote(true, Number(e.target.value))}
               >
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -147,12 +159,16 @@ export function VotePanel({
               ? `Đi ✅${selected.guests > 0 ? ` (+${selected.guests} khách)` : ""}`
               : "Không đi ❌"}
           </b>{" "}
-          (bấm nút để đổi)
+          {pending ? (
+            <span className="text-ink/40">· đang lưu…</span>
+          ) : (
+            <span>(bấm nút để đổi)</span>
+          )}
         </p>
       )}
 
       {error && (
-        <p className="mt-2 text-[12.5px] font-semibold text-danger">
+        <p className="mt-2 animate-rise text-[12.5px] font-semibold text-danger">
           {error}
         </p>
       )}
