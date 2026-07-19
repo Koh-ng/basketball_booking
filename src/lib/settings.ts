@@ -8,6 +8,8 @@ export type AppSettings = {
   bankAccountNo: string;
   bankAccountName: string;
   adminEmail: string;
+  /** Ảnh QR chuyển khoản admin tự upload (data URI), ưu tiên hơn VietQR tự tạo nếu có. */
+  qrImage: string;
 };
 
 const DEFAULTS: AppSettings = {
@@ -15,6 +17,7 @@ const DEFAULTS: AppSettings = {
   bankAccountNo: "",
   bankAccountName: "",
   adminEmail: "",
+  qrImage: "",
 };
 
 const KEY_MAP: Record<keyof AppSettings, string> = {
@@ -22,6 +25,7 @@ const KEY_MAP: Record<keyof AppSettings, string> = {
   bankAccountNo: "bank_account_no",
   bankAccountName: "bank_account_name",
   adminEmail: "admin_email",
+  qrImage: "qr_image",
 };
 
 export async function getSettings(): Promise<AppSettings> {

@@ -125,6 +125,7 @@ export async function saveSettingsAction(
     bankAccountNo: String(formData.get("bankAccountNo") ?? "").trim(),
     bankAccountName: String(formData.get("bankAccountName") ?? "").trim(),
     adminEmail: String(formData.get("adminEmail") ?? "").trim(),
+    qrImage: String(formData.get("qrImage") ?? "").trim(),
   });
   revalidateAll();
   revalidatePath("/admin/settings");

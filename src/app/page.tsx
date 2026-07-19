@@ -68,6 +68,7 @@ export default async function HomePage() {
       : null;
 
   const bank = bankInfoFrom(settings);
+  const staticQr = settings.qrImage || null;
   let paymentRows: PaymentRowClient[] = [];
   let per = 0;
   if (pastData && pastData.event.totalCost) {
@@ -78,13 +79,15 @@ export default async function HomePage() {
         memberId: r.member.id,
         name: r.member.name,
         paid: r.paid,
-        qrUrl: bank
-          ? vietQrUrl(
-              bank,
-              per,
-              `BongRo ${pastData.event.eventDate} ${r.member.name}`,
-            )
-          : null,
+        qrUrl:
+          staticQr ??
+          (bank
+            ? vietQrUrl(
+                bank,
+                per,
+                `BongRo ${pastData.event.eventDate} ${r.member.name}`,
+              )
+            : null),
       }));
   }
 

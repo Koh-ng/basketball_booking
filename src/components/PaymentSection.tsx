@@ -43,7 +43,7 @@ export function PaymentSection({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={me.qrUrl}
-            alt="QR chuyển khoản VietQR"
+            alt="QR chuyển khoản"
             className="mx-auto block h-[180px] w-[180px] rounded-[14px] border border-ink/8"
           />
         </div>
