@@ -27,7 +27,7 @@ export function vnWeekday(): number {
 /**
  * Ngày Chủ nhật sắp tới (YYYY-MM-DD) theo giờ VN.
  * Nếu hôm nay là Chủ nhật thì trả về chính hôm nay
- * (kèo hôm nay vẫn là kèo "sắp tới" cho tới hết ngày).
+ * (buổi hôm nay vẫn là buổi "sắp tới" cho tới hết ngày).
  */
 export function upcomingSunday(): string {
   const today = vnToday();

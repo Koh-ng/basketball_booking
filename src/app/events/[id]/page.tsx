@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { VotePanel } from "@/components/VotePanel";
+import { googleCalendarUrl } from "@/lib/calendar";
 import { formatDateVN } from "@/lib/dates";
-import { getEventById, getEventVotes } from "@/lib/events";
+import { getEventById, getEventVotes, isEventFinished } from "@/lib/events";
 import { formatVND, perPersonAmount } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +22,8 @@ export default async function EventDetailPage({
   const per = event.totalCost
     ? perPersonAmount(event.totalCost, data.headCount)
     : 0;
+  // Buổi chưa diễn ra và còn mở -> cho vote trước ngay tại đây
+  const votable = event.status === "open" && !isEventFinished(event);
 
   return (
     <div>
@@ -38,7 +42,7 @@ export default async function EventDetailPage({
         </p>
         {event.status === "cancelled" && (
           <p className="mt-2 text-[13px] font-bold text-ink/45">
-            ⚠️ Kèo này đã hủy
+            ⚠️ Buổi này đã hủy
           </p>
         )}
         {event.note && (
@@ -51,7 +55,41 @@ export default async function EventDetailPage({
             <b className="text-ink">{formatVND(per)}</b>/người
           </p>
         )}
+        {votable && (
+          <div className="mt-3 flex gap-2">
+            <a
+              href={googleCalendarUrl(event)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-bold text-ink/70 transition hover:border-ink/30"
+            >
+              📅 Google Calendar
+            </a>
+            <a
+              href={`/api/calendar/${event.id}`}
+              className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-bold text-ink/70 transition hover:border-ink/30"
+            >
+              📲 Lịch điện thoại
+            </a>
+          </div>
+        )}
       </div>
+
+      {votable && (
+        <div className="mt-3.5">
+          <VotePanel
+            eventId={event.id}
+            rows={data.rows.map((r) => ({
+              memberId: r.member.id,
+              name: r.member.name,
+              going: r.going,
+              guests: r.guests,
+              guestNames: r.guestNames,
+            }))}
+            locked={false}
+          />
+        </div>
+      )}
 
       <div className="mt-3.5 rounded-2xl border border-ink/8 bg-white p-4">
         <h2 className="mb-2 text-[14px] font-extrabold text-ink">
@@ -73,7 +111,8 @@ export default async function EventDetailPage({
                 {r.guests > 0 && (
                   <span className="font-medium text-ink/50">
                     {" "}
-                    (+{r.guests} khách)
+                    (+{r.guests} khách
+                    {r.guestNames ? `: ${r.guestNames}` : ""})
                   </span>
                 )}
               </span>

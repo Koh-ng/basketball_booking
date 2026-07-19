@@ -18,7 +18,7 @@ export const members = pgTable("members", {
     .defaultNow(),
 });
 
-// Một "kèo" chơi bóng. status: open -> settled | cancelled
+// Một "buổi" chơi bóng. status: open -> settled | cancelled
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   eventDate: date("event_date").notNull().unique(),
@@ -47,6 +47,8 @@ export const votes = pgTable(
     going: boolean("going").notNull(),
     // Số khách đi kèm (0-5), chỉ có nghĩa khi going = true
     guests: integer("guests").notNull().default(0),
+    // Tên khách đi kèm (không bắt buộc), VD "Tuấn, Minh"
+    guestNames: text("guest_names"),
     paid: boolean("paid").notNull().default(false),
     paidAt: timestamp("paid_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true })

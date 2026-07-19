@@ -3,10 +3,13 @@ import {
   PaymentSection,
   type PaymentRowClient,
 } from "@/components/PaymentSection";
-import { formatDateVN } from "@/lib/dates";
+import Link from "next/link";
+import { formatDateShort, formatDateVN } from "@/lib/dates";
+import { googleCalendarUrl } from "@/lib/calendar";
 import {
-  ensureUpcomingEvent,
+  ensureMonthEvents,
   getEventVotes,
+  getFutureEvents,
   getLatestPastEvent,
   getUpcomingEvent,
   type EventWithVotes,
@@ -32,7 +35,11 @@ function AttendanceList({ data }: { data: EventWithVotes }) {
           {going
             .map(
               (r) =>
-                `${r.member.name}${r.guests > 0 ? ` (+${r.guests})` : ""}`,
+                `${r.member.name}${
+                  r.guests > 0
+                    ? ` (+${r.guests}${r.guestNames ? `: ${r.guestNames}` : ""})`
+                    : ""
+                }`,
             )
             .join(", ") || "Chưa có ai"}
         </p>
@@ -60,7 +67,7 @@ function AttendanceList({ data }: { data: EventWithVotes }) {
 }
 
 export default async function HomePage() {
-  await ensureUpcomingEvent();
+  await ensureMonthEvents();
   const [upcoming, pastEvent, settings] = await Promise.all([
     getUpcomingEvent(),
     getLatestPastEvent(),
@@ -68,6 +75,11 @@ export default async function HomePage() {
   ]);
 
   const upcomingData = upcoming ? await getEventVotes(upcoming) : null;
+  const futureEvents = upcoming
+    ? (await getFutureEvents(upcoming.eventDate)).filter(
+        (e) => e.status === "open",
+      )
+    : [];
   const pastData =
     pastEvent && pastEvent.status === "settled"
       ? await getEventVotes(pastEvent)
@@ -107,7 +119,7 @@ export default async function HomePage() {
             <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(115deg,rgba(255,255,255,0.07)_0_2px,transparent_2px_26px)]" />
             <div className="relative">
               <div className="text-[11.5px] font-bold tracking-wide text-white/85 uppercase">
-                Kèo sắp tới
+                Buổi sắp tới
               </div>
               <h1 className="mt-[5px] text-[23px] font-extrabold text-white">
                 {formatDateVN(upcomingData.event.eventDate)}
@@ -129,13 +141,31 @@ export default async function HomePage() {
               </a>
               {upcomingData.event.status === "cancelled" && (
                 <p className="mt-2.5 rounded-lg bg-white/20 px-2.5 py-2 text-[13px] font-bold text-white">
-                  ⚠️ Kèo tuần này đã HỦY
+                  ⚠️ Buổi tuần này đã HỦY
                 </p>
               )}
               {upcomingData.event.note && (
                 <p className="mt-2 text-[12.5px] text-white/85">
                   📝 {upcomingData.event.note}
                 </p>
+              )}
+              {upcomingData.event.status !== "cancelled" && (
+                <div className="mt-3 flex gap-2">
+                  <a
+                    href={googleCalendarUrl(upcomingData.event)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-[12px] font-bold text-white transition hover:bg-white/25"
+                  >
+                    📅 Google Calendar
+                  </a>
+                  <a
+                    href={`/api/calendar/${upcomingData.event.id}`}
+                    className="rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-[12px] font-bold text-white transition hover:bg-white/25"
+                  >
+                    📲 Lịch điện thoại
+                  </a>
+                </div>
               )}
             </div>
           </div>
@@ -149,6 +179,7 @@ export default async function HomePage() {
                   name: r.member.name,
                   going: r.going,
                   guests: r.guests,
+                  guestNames: r.guestNames,
                 }))}
                 locked={upcomingData.event.status === "settled"}
               />
@@ -156,6 +187,25 @@ export default async function HomePage() {
           )}
 
           <AttendanceList data={upcomingData} />
+
+          {futureEvents.length > 0 && (
+            <div className="mt-3.5 rounded-2xl border border-ink/8 bg-white p-4">
+              <p className="text-[13px] font-bold text-ink/60">
+                🗓 Vote trước cho các buổi sau:
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {futureEvents.map((e) => (
+                  <Link
+                    key={e.id}
+                    href={`/events/${e.id}`}
+                    className="rounded-full border border-brand/30 bg-brand-soft px-3.5 py-2 text-[13px] font-bold text-brand transition hover:border-brand/60 active:scale-95"
+                  >
+                    CN {formatDateShort(e.eventDate)}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       )}
 

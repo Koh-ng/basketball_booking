@@ -114,18 +114,18 @@ export default async function HistoryPage() {
     .groupBy(events.id)
     .orderBy(desc(events.eventDate));
 
-  // Tính theo giờ thực tế VN: kèo hôm nay đã quá giờ kết thúc là "đã qua"
-  // Kèo sắp tới: gần nhất trên đầu, các Chủ nhật sau xếp dần xuống dưới
+  // Tính theo giờ thực tế VN: buổi hôm nay đã quá giờ kết thúc là "đã qua"
+  // Buổi sắp tới: gần nhất trên đầu, các Chủ nhật sau xếp dần xuống dưới
   const upcoming = rows
     .filter((r) => !isEventFinished(r.event))
     .sort((a, b) => a.event.eventDate.localeCompare(b.event.eventDate));
-  // Kèo đã qua: giữ nguyên dữ liệu, mới nhất trước, nhóm theo tháng
+  // Buổi đã qua: giữ nguyên dữ liệu, mới nhất trước, nhóm theo tháng
   const past = rows.filter((r) => isEventFinished(r.event));
 
   return (
     <div>
       <h1 className="mb-3.5 text-[20px] font-extrabold text-ink">
-        Lịch sử các kèo
+        Lịch sử các buổi
       </h1>
 
       {upcoming.length > 0 && (
@@ -148,7 +148,7 @@ export default async function HistoryPage() {
 
       {rows.length === 0 && (
         <p className="text-[13px] font-semibold text-ink/50">
-          Chưa có kèo nào.
+          Chưa có buổi nào.
         </p>
       )}
     </div>

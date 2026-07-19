@@ -13,7 +13,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Bóng Rổ Chủ Nhật",
   description:
-    "Vote kèo bóng rổ hàng tuần, chia tiền sân và tracking chuyển khoản",
+    "Vote buổi bóng rổ hàng tuần, chia tiền sân và tracking chuyển khoản",
 };
 
 export const viewport: Viewport = {
@@ -39,12 +39,18 @@ export default function RootLayout({
               >
                 🏀
               </Link>
-              <nav className="flex shrink-0 gap-3.5">
+              <nav className="flex shrink-0 gap-3">
                 <Link
                   href="/history"
                   className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Lịch sử
+                </Link>
+                <Link
+                  href="/stats"
+                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
+                >
+                  Thống kê
                 </Link>
                 <Link
                   href="/rules"

@@ -47,7 +47,7 @@ export default async function MembersPage() {
         )}
       </div>
       <p className="mt-3 text-[11.5px] font-semibold text-ink/40">
-        Thành viên bị ẩn sẽ không hiện trong danh sách vote của các kèo mới,
+        Thành viên bị ẩn sẽ không hiện trong danh sách vote của các buổi mới,
         nhưng lịch sử cũ vẫn giữ nguyên.
       </p>
     </div>
