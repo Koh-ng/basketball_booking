@@ -157,13 +157,7 @@ export default async function HomePage() {
                     rel="noopener noreferrer"
                     className="rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-[12px] font-bold text-white transition hover:bg-white/25"
                   >
-                    📅 Google Calendar
-                  </a>
-                  <a
-                    href={`/api/calendar/${upcomingData.event.id}`}
-                    className="rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-[12px] font-bold text-white transition hover:bg-white/25"
-                  >
-                    📲 Lịch điện thoại
+                    📅 Thêm vào Google Calendar
                   </a>
                 </div>
               )}

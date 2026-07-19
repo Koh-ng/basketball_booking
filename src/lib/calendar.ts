@@ -27,26 +27,3 @@ export function googleCalendarUrl(ev: Event): string {
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
-
-function escapeIcs(text: string): string {
-  return text.replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\n/g, "\\n");
-}
-
-/** Nội dung file .ics (Apple Calendar / lịch điện thoại) cho 1 buổi. */
-export function icsContent(ev: Event): string {
-  return [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//bong-ro-chu-nhat//VN",
-    "BEGIN:VEVENT",
-    `UID:bongro-${ev.id}-${ev.eventDate}@bong-ro-chu-nhat`,
-    `DTSTAMP:${toUtcStamp(ev.eventDate, ev.startTime)}`,
-    `DTSTART:${toUtcStamp(ev.eventDate, ev.startTime)}`,
-    `DTEND:${toUtcStamp(ev.eventDate, ev.endTime)}`,
-    `SUMMARY:${escapeIcs(TITLE)}`,
-    `LOCATION:${escapeIcs(`${VENUE.name}, ${VENUE.address}`)}`,
-    `DESCRIPTION:${escapeIcs(`Vote & chia tiền sân: ${appUrl()}\nBản đồ: ${VENUE.mapsUrl}`)}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-}

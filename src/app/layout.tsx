@@ -41,6 +41,12 @@ export default function RootLayout({
               </Link>
               <nav className="flex shrink-0 gap-3">
                 <Link
+                  href="/rules"
+                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
+                >
+                  Luật
+                </Link>
+                <Link
                   href="/history"
                   className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
@@ -51,12 +57,6 @@ export default function RootLayout({
                   className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Thống kê
-                </Link>
-                <Link
-                  href="/rules"
-                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
-                >
-                  Luật
                 </Link>
                 <Link
                   href="/admin"
