@@ -68,3 +68,5 @@ Vào `/admin` (đăng nhập bằng `ADMIN_PIN`):
 | `npm run db:generate` | tạo file migration mới sau khi sửa `src/db/schema.ts` |
 | `npm run db:migrate` | áp migration vào database |
 | `npm run db:seed` | seed danh sách thành viên mẫu |
+
+<!-- redeploy-trigger: 2026-07-19T12:30:11Z — buộc build lại production sau khi repo chuyển public -->
