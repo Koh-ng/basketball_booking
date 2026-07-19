@@ -63,13 +63,7 @@ export default async function EventDetailPage({
               rel="noopener noreferrer"
               className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-bold text-ink/70 transition hover:border-ink/30"
             >
-              📅 Google Calendar
-            </a>
-            <a
-              href={`/api/calendar/${event.id}`}
-              className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-bold text-ink/70 transition hover:border-ink/30"
-            >
-              📲 Lịch điện thoại
+              📅 Thêm vào Google Calendar
             </a>
           </div>
         )}
