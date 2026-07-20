@@ -215,10 +215,10 @@ export function EventAdminPanel({
                       value={r.paid ? "false" : "true"}
                     />
                     <button
-                      className={`rounded-full border px-[11px] py-[5px] text-[11px] font-bold transition ${
+                      className={`rounded-full border px-[11px] py-[5px] text-[11px] font-bold transition-all duration-150 active:scale-[0.94] ${
                         r.paid
-                          ? "border-success-border bg-success-bg text-success"
-                          : "border-amber-border bg-amber-bg text-amber"
+                          ? "border-success-border bg-success-bg text-success hover:border-success/60 hover:bg-success-bg/70"
+                          : "border-amber-border bg-amber-bg text-amber hover:border-amber/60 hover:bg-amber-bg/70"
                       }`}
                     >
                       {r.paid
