@@ -63,6 +63,8 @@ export function EventAdminPanel({
   const effectiveHostId = event.hostId ?? defaultHost?.id ?? null;
   const effectiveHost =
     hosts.find((h) => h.id === effectiveHostId) ?? null;
+  // Người đã là mặc định thì bỏ khỏi danh sách chọn riêng — chọn "Mặc định" là đủ.
+  const selectableHosts = hosts.filter((h) => h.id !== defaultHost?.id);
 
   return (
     <section className="rounded-2xl border border-ink/8 bg-white p-4">
@@ -94,7 +96,7 @@ export function EventAdminPanel({
             <option value="">
               — Mặc định{defaultHost ? ` (${defaultHost.name})` : ""} —
             </option>
-            {hosts.map((h) => (
+            {selectableHosts.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
               </option>
