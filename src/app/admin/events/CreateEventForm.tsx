@@ -16,6 +16,8 @@ export function CreateEventForm({
     null,
   );
   const defaultHost = hosts.find((h) => h.id === Number(defaultHostId));
+  // Người đã là mặc định thì bỏ khỏi danh sách chọn riêng — chọn "Mặc định" là đủ.
+  const selectableHosts = hosts.filter((h) => h.id !== defaultHost?.id);
 
   return (
     <form
@@ -49,7 +51,7 @@ export function CreateEventForm({
           <option value="">
             🧑‍💼 Quản lý — Mặc định{defaultHost ? ` (${defaultHost.name})` : ""}
           </option>
-          {hosts.map((h) => (
+          {selectableHosts.map((h) => (
             <option key={h.id} value={h.id}>
               🧑‍💼 Quản lý — {h.name}
             </option>
