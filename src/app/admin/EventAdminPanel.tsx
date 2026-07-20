@@ -8,6 +8,7 @@ import {
 } from "@/lib/messages";
 import { formatVND, perPersonAmount } from "@/lib/money";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
+import { AttendanceEditor } from "./AttendanceEditor";
 import {
   setEventHostAction,
   setEventStatusAction,
@@ -106,6 +107,10 @@ export function EventAdminPanel({
             Lưu
           </button>
         </form>
+      )}
+
+      {event.status !== "cancelled" && (
+        <AttendanceEditor eventId={event.id} rows={data.rows} />
       )}
 
       {event.status === "cancelled" && (
