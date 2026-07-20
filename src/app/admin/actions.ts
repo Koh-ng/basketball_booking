@@ -11,7 +11,7 @@ import {
   setAdminCookie,
   verifyPin,
 } from "@/lib/auth";
-import { setPaid } from "@/lib/events";
+import { castVote, setPaid } from "@/lib/events";
 import { MAX_HOST_PROFILES } from "@/lib/hostProfiles";
 import { saveSettings } from "@/lib/settings";
 import type { EventStatus } from "@/lib/status";
@@ -94,6 +94,26 @@ export async function togglePaidAction(formData: FormData) {
   const paid = formData.get("paid") === "true";
   if (!eventId || !memberId) return;
   await setPaid(eventId, memberId, paid);
+  revalidateAll(eventId);
+}
+
+/**
+ * Admin tự chỉnh người tham gia của 1 buổi (kể cả sau khi đã chốt/kết thúc)
+ * — dùng khi có người đi thực tế nhưng chưa vote, để tính lại đúng số người.
+ */
+export async function adminSetVoteAction(formData: FormData) {
+  await requireAdmin();
+  const eventId = Number(formData.get("eventId"));
+  const memberId = Number(formData.get("memberId"));
+  if (!eventId || !memberId) return;
+  const going = formData.get("going") === "true";
+  const guests = going
+    ? Math.min(5, Math.max(0, Math.floor(Number(formData.get("guests"))) || 0))
+    : 0;
+  const guestNamesRaw = String(formData.get("guestNames") ?? "").trim();
+  const guestNames =
+    guests > 0 && guestNamesRaw ? guestNamesRaw.slice(0, 200) : null;
+  await castVote(eventId, memberId, going, guests, guestNames);
   revalidateAll(eventId);
 }
 
