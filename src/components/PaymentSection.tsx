@@ -1,7 +1,3 @@
-"use client";
-
-import { useSelectedMember } from "./useSelectedMember";
-
 export type PaymentRowClient = {
   memberId: number;
   name: string;
@@ -13,18 +9,17 @@ export type PaymentRowClient = {
 
 export function PaymentSection({
   rows,
+  me,
   perPersonLabel,
   totalLabel,
   bankLine,
 }: {
   rows: PaymentRowClient[];
+  me: PaymentRowClient | null;
   perPersonLabel: string;
   totalLabel: string;
   bankLine: string | null;
 }) {
-  const [memberId] = useSelectedMember();
-  const me = rows.find((r) => r.memberId === memberId) ?? null;
-
   return (
     <div className="rounded-2xl border border-ink/8 bg-white p-4">
       <p className="text-[13px] font-semibold text-ink/65">

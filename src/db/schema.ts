@@ -13,6 +13,8 @@ export const members = pgTable("members", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   active: boolean("active").notNull().default(true),
+  // null = chưa đổi, dùng PIN mặc định "123456" (xem lib/memberAuth.ts)
+  pinHash: text("pin_hash"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

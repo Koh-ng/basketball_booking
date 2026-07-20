@@ -1,3 +1,4 @@
+import { LoginPrompt } from "@/components/LoginPrompt";
 import { VotePanel } from "@/components/VotePanel";
 import Link from "next/link";
 import { formatDateShort, formatDateVN } from "@/lib/dates";
@@ -10,6 +11,7 @@ import {
   getUpcomingEvent,
   type EventWithVotes,
 } from "@/lib/events";
+import { getCurrentMember } from "@/lib/memberAuth";
 import { formatVND } from "@/lib/money";
 import { VENUE } from "@/lib/venue";
 
@@ -62,12 +64,16 @@ function AttendanceList({ data }: { data: EventWithVotes }) {
 
 export default async function HomePage() {
   await ensureMonthEvents();
-  const [upcoming, pastEvent] = await Promise.all([
+  const [upcoming, pastEvent, me] = await Promise.all([
     getUpcomingEvent(),
     getLatestPastEvent(),
+    getCurrentMember(),
   ]);
 
   const upcomingData = upcoming ? await getEventVotes(upcoming) : null;
+  const myRow = me
+    ? (upcomingData?.rows.find((r) => r.member.id === me.id) ?? null)
+    : null;
   const futureEvents = upcoming
     ? (await getFutureEvents(upcoming.eventDate)).filter(
         (e) => e.status === "open",
@@ -136,20 +142,24 @@ export default async function HomePage() {
 
           {upcomingData.event.status !== "cancelled" && (
             <div className="mt-4">
-              <VotePanel
-                eventId={upcomingData.event.id}
-                rows={upcomingData.rows.map((r) => ({
-                  memberId: r.member.id,
-                  name: r.member.name,
-                  going: r.going,
-                  guests: r.guests,
-                  guestNames: r.guestNames,
-                }))}
-                locked={
-                  upcomingData.event.status === "settled" ||
-                  upcomingData.event.status === "completed"
-                }
-              />
+              {me ? (
+                <VotePanel
+                  eventId={upcomingData.event.id}
+                  me={{
+                    memberId: me.id,
+                    name: me.name,
+                    going: myRow?.going ?? null,
+                    guests: myRow?.guests ?? 0,
+                    guestNames: myRow?.guestNames ?? null,
+                  }}
+                  locked={
+                    upcomingData.event.status === "settled" ||
+                    upcomingData.event.status === "completed"
+                  }
+                />
+              ) : (
+                <LoginPrompt next="/" />
+              )}
             </div>
           )}
 

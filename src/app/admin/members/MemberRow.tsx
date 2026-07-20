@@ -1,7 +1,11 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { renameMemberAction, toggleMemberAction } from "../actions";
+import {
+  renameMemberAction,
+  resetMemberPinAction,
+  toggleMemberAction,
+} from "../actions";
 import type { Member } from "@/db/schema";
 
 export function MemberRow({ member }: { member: Member }) {
@@ -57,33 +61,48 @@ export function MemberRow({ member }: { member: Member }) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-2 border-b border-ink/6 px-3.5 py-3 last:border-b-0">
-      <span
-        className={`min-w-0 flex-1 truncate text-sm font-semibold ${
-          member.active ? "text-ink" : "text-ink/35 line-through"
-        }`}
-      >
-        {member.name}
-      </span>
-      <div className="flex shrink-0 gap-1.5">
-        <button
-          onClick={() => setEditing(true)}
-          className="rounded-[10px] border border-ink/15 bg-white px-3 py-1.5 text-[11.5px] font-bold text-ink hover:bg-ink/3"
+    <div className="border-b border-ink/6 px-3.5 py-3 last:border-b-0">
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className={`min-w-0 flex-1 truncate text-sm font-semibold ${
+            member.active ? "text-ink" : "text-ink/35 line-through"
+          }`}
         >
-          ✏️ Sửa
-        </button>
-        <form action={toggleMemberAction}>
+          {member.name}
+          {member.pinHash === null && (
+            <span className="ml-1.5 text-[10.5px] font-semibold text-ink/35">
+              (PIN mặc định)
+            </span>
+          )}
+        </span>
+        <div className="flex shrink-0 gap-1.5">
+          <button
+            onClick={() => setEditing(true)}
+            className="rounded-[10px] border border-ink/15 bg-white px-3 py-1.5 text-[11.5px] font-bold text-ink hover:bg-ink/3"
+          >
+            ✏️ Sửa
+          </button>
+          <form action={toggleMemberAction}>
+            <input type="hidden" name="memberId" value={member.id} />
+            <input
+              type="hidden"
+              name="active"
+              value={member.active ? "false" : "true"}
+            />
+            <button className="rounded-[10px] border border-ink/15 bg-white px-3 py-1.5 text-[11.5px] font-bold text-ink hover:bg-ink/3">
+              {member.active ? "Ẩn khỏi danh sách" : "Kích hoạt lại"}
+            </button>
+          </form>
+        </div>
+      </div>
+      {member.pinHash !== null && (
+        <form action={resetMemberPinAction} className="mt-1.5">
           <input type="hidden" name="memberId" value={member.id} />
-          <input
-            type="hidden"
-            name="active"
-            value={member.active ? "false" : "true"}
-          />
-          <button className="rounded-[10px] border border-ink/15 bg-white px-3 py-1.5 text-[11.5px] font-bold text-ink hover:bg-ink/3">
-            {member.active ? "Ẩn khỏi danh sách" : "Kích hoạt lại"}
+          <button className="text-[11px] font-semibold text-ink/40 underline decoration-ink/20 underline-offset-2 hover:text-ink/60">
+            Đặt lại PIN về mặc định (123456)
           </button>
         </form>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LoginPrompt } from "@/components/LoginPrompt";
 import {
   PaymentSection,
   type PaymentRowClient,
@@ -9,6 +10,7 @@ import { googleCalendarUrl } from "@/lib/calendar";
 import { formatDateVN } from "@/lib/dates";
 import { getEventById, getEventVotes, isEventFinished } from "@/lib/events";
 import { bankInfoFromHost, getEffectiveHost } from "@/lib/hostProfiles";
+import { getCurrentMember } from "@/lib/memberAuth";
 import { formatVND, perPersonAmount } from "@/lib/money";
 import { getSettings } from "@/lib/settings";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
@@ -25,8 +27,12 @@ export default async function EventDetailPage({
   const event = await getEventById(Number(id));
   if (!event) notFound();
 
-  const data = await getEventVotes(event);
+  const [data, me] = await Promise.all([
+    getEventVotes(event),
+    getCurrentMember(),
+  ]);
   const going = data.rows.filter((r) => r.going === true);
+  const myRow = me ? (data.rows.find((r) => r.member.id === me.id) ?? null) : null;
   const per = event.totalCost
     ? perPersonAmount(event.totalCost, data.headCount)
     : 0;
@@ -120,6 +126,11 @@ export default async function EventDetailPage({
           </h2>
           <PaymentSection
             rows={paymentRows}
+            me={
+              me
+                ? (paymentRows.find((r) => r.memberId === me.id) ?? null)
+                : null
+            }
             totalLabel={formatVND(event.totalCost ?? 0)}
             perPersonLabel={formatVND(per)}
             bankLine={bankLine}
@@ -129,17 +140,21 @@ export default async function EventDetailPage({
 
       {votable && (
         <div className="mt-3.5">
-          <VotePanel
-            eventId={event.id}
-            rows={data.rows.map((r) => ({
-              memberId: r.member.id,
-              name: r.member.name,
-              going: r.going,
-              guests: r.guests,
-              guestNames: r.guestNames,
-            }))}
-            locked={false}
-          />
+          {me ? (
+            <VotePanel
+              eventId={event.id}
+              me={{
+                memberId: me.id,
+                name: me.name,
+                going: myRow?.going ?? null,
+                guests: myRow?.guests ?? 0,
+                guestNames: myRow?.guestNames ?? null,
+              }}
+              locked={false}
+            />
+          ) : (
+            <LoginPrompt next={`/events/${event.id}`} />
+          )}
         </div>
       )}
 
