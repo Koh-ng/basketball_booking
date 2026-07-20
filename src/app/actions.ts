@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { castVote, getEventById } from "@/lib/events";
+import { getCurrentMember } from "@/lib/memberAuth";
 
 export async function voteAction(
   eventId: number,
@@ -10,6 +11,10 @@ export async function voteAction(
   guests: number = 0,
   guestNames: string | null = null,
 ) {
+  const me = await getCurrentMember();
+  if (!me || me.id !== memberId) {
+    return { ok: false, error: "Bạn cần đăng nhập đúng tên của mình để vote" };
+  }
   const event = await getEventById(eventId);
   if (!event || event.status === "cancelled") {
     return { ok: false, error: "Buổi không tồn tại hoặc đã hủy" };

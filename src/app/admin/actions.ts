@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth";
 import { castVote, setPaid } from "@/lib/events";
 import { MAX_HOST_PROFILES } from "@/lib/hostProfiles";
+import { resetMemberPin } from "@/lib/memberAuth";
 import { saveSettings } from "@/lib/settings";
 import type { EventStatus } from "@/lib/status";
 
@@ -246,6 +247,15 @@ export async function toggleMemberAction(formData: FormData) {
   if (!memberId) return;
   await db.update(members).set({ active }).where(eq(members.id, memberId));
   revalidateAll();
+  revalidatePath("/admin/members");
+}
+
+/** Admin đặt lại PIN của 1 thành viên về mặc định (123456) — khi họ quên PIN. */
+export async function resetMemberPinAction(formData: FormData) {
+  await requireAdmin();
+  const memberId = Number(formData.get("memberId"));
+  if (!memberId) return;
+  await resetMemberPin(memberId);
   revalidatePath("/admin/members");
 }
 

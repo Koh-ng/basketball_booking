@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import Link from "next/link";
+import { getCurrentMember } from "@/lib/memberAuth";
 import { VENUE } from "@/lib/venue";
 import "./globals.css";
 
@@ -21,11 +22,12 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const me = await getCurrentMember();
   return (
     <html lang="vi" className={`${manrope.variable} h-full antialiased`}>
       <body className="min-h-full bg-page font-sans text-ink">
@@ -66,6 +68,30 @@ export default function RootLayout({
                 </Link>
               </nav>
             </header>
+            {me ? (
+              <div className="flex items-center justify-between border-b border-ink/6 bg-ink/2 px-[18px] py-1.5 text-[11.5px] font-semibold text-ink/55">
+                <span>
+                  👤 {me.name}
+                  {me.pinHash === null ? " · PIN mặc định" : ""}
+                </span>
+                <Link
+                  href="/account"
+                  className="text-brand-dark underline decoration-brand/30 underline-offset-2"
+                >
+                  Tài khoản
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between border-b border-ink/6 bg-amber-bg px-[18px] py-1.5 text-[11.5px] font-bold text-amber">
+                <span>🔒 Chưa đăng nhập</span>
+                <Link
+                  href="/login"
+                  className="underline decoration-amber/40 underline-offset-2"
+                >
+                  Đăng nhập
+                </Link>
+              </div>
+            )}
             <main className="flex-1 px-[18px] pt-5 pb-[30px]">
               {children}
             </main>
