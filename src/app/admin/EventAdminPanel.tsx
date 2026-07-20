@@ -1,5 +1,6 @@
 import { CopyButton } from "@/components/CopyButton";
 import type { EventWithVotes } from "@/lib/events";
+import type { HostProfile } from "@/lib/hostProfiles";
 import {
   gameDayMessage,
   paymentReminderMessage,
@@ -9,6 +10,7 @@ import { formatVND, perPersonAmount } from "@/lib/money";
 import type { AppSettings } from "@/lib/settings";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 import {
+  setEventHostAction,
   setEventStatusAction,
   settleEventAction,
   togglePaidAction,
@@ -44,10 +46,12 @@ function StatusForm({
 export function EventAdminPanel({
   data,
   settings,
+  hosts,
   showVoteReminders,
 }: {
   data: EventWithVotes;
   settings: AppSettings;
+  hosts: HostProfile[];
   showVoteReminders: boolean;
 }) {
   const { event } = data;
@@ -55,6 +59,16 @@ export function EventAdminPanel({
     ? perPersonAmount(event.totalCost, data.headCount)
     : 0;
   const going = data.rows.filter((r) => r.going === true);
+  const currentHost = hosts.find((h) => h.id === event.hostId) ?? null;
+  const reminderSettings: AppSettings = currentHost
+    ? {
+        ...settings,
+        bankCode: currentHost.bankCode,
+        bankAccountNo: currentHost.bankAccountNo,
+        bankAccountName: currentHost.bankAccountName,
+        qrImage: currentHost.qrImage ?? "",
+      }
+    : settings;
 
   return (
     <section className="rounded-2xl border border-ink/8 bg-white p-4">
@@ -68,6 +82,33 @@ export function EventAdminPanel({
           {STATUS_LABEL[event.status]}
         </span>
       </div>
+
+      {hosts.length > 0 && (
+        <form
+          action={setEventHostAction}
+          className="mb-3 flex items-center gap-2"
+        >
+          <input type="hidden" name="eventId" value={event.id} />
+          <label className="shrink-0 text-[12px] font-bold text-ink/55">
+            🧑‍💼 Host nhận tiền:
+          </label>
+          <select
+            name="hostId"
+            defaultValue={event.hostId ?? ""}
+            className="flex-1 rounded-[10px] border border-ink/15 px-2.5 py-2 text-[12.5px]"
+          >
+            <option value="">— Mặc định (Cài đặt) —</option>
+            {hosts.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.name}
+              </option>
+            ))}
+          </select>
+          <button className="shrink-0 rounded-[10px] border border-ink/15 bg-white px-3 py-2 text-[12px] font-bold text-ink hover:bg-ink/3">
+            Lưu
+          </button>
+        </form>
+      )}
 
       {event.status === "cancelled" && (
         <div className="space-y-2.5">
@@ -194,7 +235,7 @@ export function EventAdminPanel({
             <div className="flex flex-wrap gap-2">
               <CopyButton
                 label="📋 Copy tin nhắc chuyển khoản"
-                text={paymentReminderMessage(data, settings)}
+                text={paymentReminderMessage(data, reminderSettings)}
               />
               {event.status === "settled" && (
                 <form action={unsettleEventAction}>
