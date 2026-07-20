@@ -84,7 +84,24 @@ export const settings = pgTable("settings", {
   value: text("value").notNull(),
 });
 
+// Feedback/góp ý từ thành viên: báo lỗi, đề xuất tính năng, góp ý khác.
+export const feedback = pgTable("feedback", {
+  id: serial("id").primaryKey(),
+  memberId: integer("member_id").references(() => members.id, {
+    onDelete: "set null",
+  }),
+  category: text("category", { enum: ["bug", "feature", "other"] }).notNull(),
+  message: text("message").notNull(),
+  status: text("status", { enum: ["new", "reviewed"] })
+    .notNull()
+    .default("new"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Member = typeof members.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type Vote = typeof votes.$inferSelect;
 export type HostProfile = typeof hostProfiles.$inferSelect;
+export type Feedback = typeof feedback.$inferSelect;

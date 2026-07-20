@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { events, hostProfiles, members, votes } from "@/db/schema";
+import { events, feedback, hostProfiles, members, votes } from "@/db/schema";
 import { and, eq, ne } from "drizzle-orm";
 import {
   clearAdminCookie,
@@ -12,6 +12,7 @@ import {
   verifyPin,
 } from "@/lib/auth";
 import { castVote, setPaid } from "@/lib/events";
+import type { FeedbackStatus } from "@/lib/feedback";
 import { MAX_HOST_PROFILES } from "@/lib/hostProfiles";
 import { resetMemberPin } from "@/lib/memberAuth";
 import { saveSettings } from "@/lib/settings";
@@ -337,4 +338,14 @@ export async function deleteHostProfileAction(formData: FormData) {
   await db.delete(hostProfiles).where(eq(hostProfiles.id, hostId));
   revalidateAll();
   revalidatePath("/admin/hosts");
+}
+
+/** Đánh dấu 1 feedback là mới / đã ghi nhận. */
+export async function toggleFeedbackStatusAction(formData: FormData) {
+  await requireAdmin();
+  const feedbackId = Number(formData.get("feedbackId"));
+  const status = String(formData.get("status") ?? "") as FeedbackStatus;
+  if (!feedbackId || (status !== "new" && status !== "reviewed")) return;
+  await db.update(feedback).set({ status }).where(eq(feedback.id, feedbackId));
+  revalidatePath("/admin/feedback");
 }

@@ -8,6 +8,7 @@ import {
   getOutstandingDebts,
   getUpcomingEvent,
 } from "@/lib/events";
+import { countNewFeedback } from "@/lib/feedback";
 import { listHostProfiles } from "@/lib/hostProfiles";
 import { formatVND } from "@/lib/money";
 import { getSettings } from "@/lib/settings";
@@ -20,12 +21,14 @@ export default async function AdminPage() {
   await requireAdmin();
   await ensureUpcomingEvent();
 
-  const [upcoming, pastEvent, settings, hosts] = await Promise.all([
-    getUpcomingEvent(),
-    getLatestPastEvent(),
-    getSettings(),
-    listHostProfiles(),
-  ]);
+  const [upcoming, pastEvent, settings, hosts, newFeedbackCount] =
+    await Promise.all([
+      getUpcomingEvent(),
+      getLatestPastEvent(),
+      getSettings(),
+      listHostProfiles(),
+      countNewFeedback(),
+    ]);
   const upcomingData = upcoming ? await getEventVotes(upcoming) : null;
   const pastData = pastEvent ? await getEventVotes(pastEvent) : null;
   const debts = await getOutstandingDebts();
@@ -65,6 +68,17 @@ export default async function AdminPage() {
           className="rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
         >
           ⚙️ Cài đặt
+        </Link>
+        <Link
+          href="/admin/feedback"
+          className="relative rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
+        >
+          💬 Góp ý
+          {newFeedbackCount > 0 && (
+            <span className="ml-1.5 rounded-full bg-danger px-[7px] py-[1px] text-[10.5px] font-extrabold text-white">
+              {newFeedbackCount}
+            </span>
+          )}
         </Link>
       </nav>
 

@@ -86,3 +86,16 @@ export function formatDateShort(isoDate: string): string {
   const [, m, day] = isoDate.split("-");
   return `${day}/${m}`;
 }
+
+/** Date -> "19/07/2026 14:35" theo giờ VN */
+export function formatDateTimeVN(date: Date): string {
+  return new Intl.DateTimeFormat("vi-VN", {
+    timeZone: TZ,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(date);
+}
