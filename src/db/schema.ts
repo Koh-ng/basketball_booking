@@ -18,6 +18,20 @@ export const members = pgTable("members", {
     .defaultNow(),
 });
 
+// Profile của admin nhận tiền (tối đa 4) — mỗi buổi chọn 1 người host để QR
+// chuyển khoản link đúng tài khoản người đó.
+export const hostProfiles = pgTable("host_profiles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  bankCode: text("bank_code").notNull().default(""),
+  bankAccountNo: text("bank_account_no").notNull().default(""),
+  bankAccountName: text("bank_account_name").notNull().default(""),
+  qrImage: text("qr_image"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // Một "buổi" chơi bóng. status: open -> settled -> completed, hoặc open -> cancelled
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
@@ -31,6 +45,10 @@ export const events = pgTable("events", {
     .default("open"),
   totalCost: integer("total_cost"),
   note: text("note"),
+  // Người host nhận tiền của buổi này (null = dùng tài khoản mặc định ở Cài đặt)
+  hostId: integer("host_id").references(() => hostProfiles.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -68,3 +86,4 @@ export const settings = pgTable("settings", {
 export type Member = typeof members.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type Vote = typeof votes.$inferSelect;
+export type HostProfile = typeof hostProfiles.$inferSelect;

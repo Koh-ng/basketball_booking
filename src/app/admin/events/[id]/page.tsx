@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { formatDateVN } from "@/lib/dates";
 import { getEventById, getEventVotes, isEventFinished } from "@/lib/events";
+import { listHostProfiles } from "@/lib/hostProfiles";
 import { getSettings } from "@/lib/settings";
 import { EventAdminPanel } from "../../EventAdminPanel";
 
@@ -18,9 +19,10 @@ export default async function AdminEventDetailPage({
   const event = await getEventById(Number(id));
   if (!event) notFound();
 
-  const [data, settings] = await Promise.all([
+  const [data, settings, hosts] = await Promise.all([
     getEventVotes(event),
     getSettings(),
+    listHostProfiles(),
   ]);
 
   return (
@@ -40,6 +42,7 @@ export default async function AdminEventDetailPage({
       <EventAdminPanel
         data={data}
         settings={settings}
+        hosts={hosts}
         showVoteReminders={!isEventFinished(event)}
       />
     </div>

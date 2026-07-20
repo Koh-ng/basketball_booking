@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { events, members } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { events, hostProfiles, members } from "@/db/schema";
+import { and, eq, ne } from "drizzle-orm";
 import {
   clearAdminCookie,
   requireAdmin,
@@ -12,6 +12,7 @@ import {
   verifyPin,
 } from "@/lib/auth";
 import { setPaid } from "@/lib/events";
+import { MAX_HOST_PROFILES } from "@/lib/hostProfiles";
 import { saveSettings } from "@/lib/settings";
 import type { EventStatus } from "@/lib/status";
 
@@ -31,6 +32,17 @@ function revalidateAll(eventId?: number) {
     revalidatePath(`/admin/events/${eventId}`);
     revalidatePath(`/events/${eventId}`);
   }
+}
+
+/** Admin chọn ai host buổi này -> QR chuyển khoản dùng tài khoản của người đó. */
+export async function setEventHostAction(formData: FormData) {
+  await requireAdmin();
+  const eventId = Number(formData.get("eventId"));
+  const hostIdRaw = String(formData.get("hostId") ?? "");
+  if (!eventId) return;
+  const hostId = hostIdRaw ? Number(hostIdRaw) : null;
+  await db.update(events).set({ hostId }).where(eq(events.id, eventId));
+  revalidateAll(eventId);
 }
 
 export async function loginAction(
@@ -115,6 +127,7 @@ export async function createEventAction(
   await requireAdmin();
   const eventDate = String(formData.get("eventDate") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
+  const hostIdRaw = String(formData.get("hostId") ?? "");
   if (!eventDate) return { ok: false, error: "Chọn ngày cho buổi mới" };
 
   const existing = await db
@@ -128,7 +141,11 @@ export async function createEventAction(
 
   const [created] = await db
     .insert(events)
-    .values({ eventDate, note: note || null })
+    .values({
+      eventDate,
+      note: note || null,
+      hostId: hostIdRaw ? Number(hostIdRaw) : null,
+    })
     .returning({ id: events.id });
   revalidateAll(created.id);
   redirect(`/admin/events/${created.id}`);
@@ -193,4 +210,59 @@ export async function saveSettingsAction(
   revalidateAll();
   revalidatePath("/admin/settings");
   return { ok: true };
+}
+
+/** Tạo mới (không có hostId) hoặc cập nhật (có hostId) 1 profile host. */
+export async function saveHostProfileAction(
+  _prev: { ok: boolean; error?: string } | null,
+  formData: FormData,
+) {
+  await requireAdmin();
+  const hostId = formData.get("hostId")
+    ? Number(formData.get("hostId"))
+    : null;
+  const name = String(formData.get("name") ?? "").trim();
+  const bankCode = String(formData.get("bankCode") ?? "").trim();
+  const bankAccountNo = String(formData.get("bankAccountNo") ?? "").trim();
+  const bankAccountName = String(formData.get("bankAccountName") ?? "").trim();
+  const qrImage = String(formData.get("qrImage") ?? "").trim();
+  if (!name) return { ok: false, error: "Tên không được để trống" };
+
+  const dup = await db
+    .select({ id: hostProfiles.id })
+    .from(hostProfiles)
+    .where(
+      hostId
+        ? and(eq(hostProfiles.name, name), ne(hostProfiles.id, hostId))
+        : eq(hostProfiles.name, name),
+    )
+    .limit(1);
+  if (dup[0]) return { ok: false, error: "Đã có người host tên này rồi" };
+
+  if (hostId) {
+    await db
+      .update(hostProfiles)
+      .set({ name, bankCode, bankAccountNo, bankAccountName, qrImage })
+      .where(eq(hostProfiles.id, hostId));
+  } else {
+    const count = await db.$count(hostProfiles);
+    if (count >= MAX_HOST_PROFILES) {
+      return { ok: false, error: `Tối đa ${MAX_HOST_PROFILES} người host` };
+    }
+    await db
+      .insert(hostProfiles)
+      .values({ name, bankCode, bankAccountNo, bankAccountName, qrImage });
+  }
+  revalidateAll();
+  revalidatePath("/admin/hosts");
+  return { ok: true };
+}
+
+export async function deleteHostProfileAction(formData: FormData) {
+  await requireAdmin();
+  const hostId = Number(formData.get("hostId"));
+  if (!hostId) return;
+  await db.delete(hostProfiles).where(eq(hostProfiles.id, hostId));
+  revalidateAll();
+  revalidatePath("/admin/hosts");
 }

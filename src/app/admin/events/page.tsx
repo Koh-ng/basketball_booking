@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { formatDateVN } from "@/lib/dates";
 import { ensureMonthEvents, listEventsSummary } from "@/lib/events";
+import { listHostProfiles } from "@/lib/hostProfiles";
 import { formatVND } from "@/lib/money";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 import { CreateEventForm } from "./CreateEventForm";
@@ -11,7 +12,10 @@ export const dynamic = "force-dynamic";
 export default async function AdminEventsPage() {
   await requireAdmin();
   await ensureMonthEvents();
-  const rows = await listEventsSummary();
+  const [rows, hosts] = await Promise.all([
+    listEventsSummary(),
+    listHostProfiles(),
+  ]);
 
   return (
     <div>
@@ -22,7 +26,7 @@ export default async function AdminEventsPage() {
         </Link>
       </div>
 
-      <CreateEventForm />
+      <CreateEventForm hosts={hosts} />
 
       {rows.length === 0 && (
         <p className="text-[13px] font-semibold text-ink/50">

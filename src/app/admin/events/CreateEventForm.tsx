@@ -1,9 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
+import type { HostProfile } from "@/lib/hostProfiles";
 import { createEventAction } from "../actions";
 
-export function CreateEventForm() {
+export function CreateEventForm({ hosts }: { hosts: HostProfile[] }) {
   const [state, formAction, pending] = useActionState(
     createEventAction,
     null,
@@ -32,6 +33,20 @@ export function CreateEventForm() {
           {pending ? "Đang tạo..." : "Tạo buổi"}
         </button>
       </div>
+      {hosts.length > 0 && (
+        <select
+          name="hostId"
+          defaultValue=""
+          className="rounded-[10px] border border-ink/15 px-3 py-2.5 text-[13px]"
+        >
+          <option value="">🧑‍💼 Host — Mặc định (Cài đặt)</option>
+          {hosts.map((h) => (
+            <option key={h.id} value={h.id}>
+              🧑‍💼 Host — {h.name}
+            </option>
+          ))}
+        </select>
+      )}
       {state?.error && (
         <p className="text-[12.5px] font-semibold text-danger">
           {state.error}

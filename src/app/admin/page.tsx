@@ -8,6 +8,7 @@ import {
   getOutstandingDebts,
   getUpcomingEvent,
 } from "@/lib/events";
+import { listHostProfiles } from "@/lib/hostProfiles";
 import { formatVND } from "@/lib/money";
 import { getSettings } from "@/lib/settings";
 import { EventAdminPanel } from "./EventAdminPanel";
@@ -19,10 +20,11 @@ export default async function AdminPage() {
   await requireAdmin();
   await ensureUpcomingEvent();
 
-  const [upcoming, pastEvent, settings] = await Promise.all([
+  const [upcoming, pastEvent, settings, hosts] = await Promise.all([
     getUpcomingEvent(),
     getLatestPastEvent(),
     getSettings(),
+    listHostProfiles(),
   ]);
   const upcomingData = upcoming ? await getEventVotes(upcoming) : null;
   const pastData = pastEvent ? await getEventVotes(pastEvent) : null;
@@ -39,22 +41,28 @@ export default async function AdminPage() {
         </form>
       </div>
 
-      <nav className="mb-4 flex gap-2.5">
+      <nav className="mb-4 grid grid-cols-2 gap-2.5">
         <Link
           href="/admin/events"
-          className="flex-1 rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
+          className="rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
         >
           📅 Tất cả buổi
         </Link>
         <Link
           href="/admin/members"
-          className="flex-1 rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
+          className="rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
         >
           👥 Thành viên
         </Link>
         <Link
+          href="/admin/hosts"
+          className="rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
+        >
+          🧑‍💼 Người nhận tiền
+        </Link>
+        <Link
           href="/admin/settings"
-          className="flex-1 rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
+          className="rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
         >
           ⚙️ Cài đặt
         </Link>
@@ -68,6 +76,7 @@ export default async function AdminPage() {
           <EventAdminPanel
             data={upcomingData}
             settings={settings}
+            hosts={hosts}
             showVoteReminders
           />
         </div>
@@ -81,6 +90,7 @@ export default async function AdminPage() {
           <EventAdminPanel
             data={pastData}
             settings={settings}
+            hosts={hosts}
             showVoteReminders={false}
           />
         </div>
