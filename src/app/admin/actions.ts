@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { events, hostProfiles, members } from "@/db/schema";
+import { events, hostProfiles, members, votes } from "@/db/schema";
 import { and, eq, ne } from "drizzle-orm";
 import {
   clearAdminCookie,
@@ -115,6 +115,40 @@ export async function adminSetVoteAction(formData: FormData) {
     guests > 0 && guestNamesRaw ? guestNamesRaw.slice(0, 200) : null;
   await castVote(eventId, memberId, going, guests, guestNames);
   revalidateAll(eventId);
+}
+
+/** Admin thêm 1 thành viên vào danh sách "Đi" của buổi qua ô tìm kiếm tên. */
+export async function adminAddParticipantAction(
+  _prev: { ok: boolean; error?: string } | null,
+  formData: FormData,
+) {
+  await requireAdmin();
+  const eventId = Number(formData.get("eventId"));
+  const memberName = String(formData.get("memberName") ?? "").trim();
+  if (!eventId) return { ok: false, error: "Thiếu buổi" };
+  if (!memberName) return { ok: false, error: "Chọn 1 người để thêm" };
+
+  const [member] = await db
+    .select()
+    .from(members)
+    .where(eq(members.name, memberName))
+    .limit(1);
+  if (!member) {
+    return { ok: false, error: "Không tìm thấy thành viên này" };
+  }
+
+  const [existing] = await db
+    .select({ going: votes.going })
+    .from(votes)
+    .where(and(eq(votes.eventId, eventId), eq(votes.memberId, member.id)))
+    .limit(1);
+  if (existing?.going) {
+    return { ok: false, error: `${member.name} đã có trong buổi rồi` };
+  }
+
+  await castVote(eventId, member.id, true, 0, null);
+  revalidateAll(eventId);
+  return { ok: true };
 }
 
 /** Chuyển trạng thái buổi: mở lại (open), kết thúc (completed), hoặc hủy (cancelled). */
