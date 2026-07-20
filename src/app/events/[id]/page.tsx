@@ -43,7 +43,6 @@ export default async function EventDetailPage({
     const settings = await getSettings();
     const host = await getEffectiveHost(event.hostId, settings.defaultHostId);
     const bank = host ? bankInfoFromHost(host) : null;
-    const staticQr = host?.qrImage || null;
     bankLine = bank
       ? `CK: ${bank.bankCode} ${bank.accountNo} (${bank.accountName})`
       : null;
@@ -53,15 +52,13 @@ export default async function EventDetailPage({
       guests: r.guests,
       amountLabel: formatVND(per * (1 + r.guests)),
       paid: r.paid,
-      qrUrl:
-        staticQr ??
-        (bank
-          ? vietQrUrl(
-              bank,
-              per * (1 + r.guests),
-              `BongRo ${event.eventDate} ${r.member.name}`,
-            )
-          : null),
+      qrUrl: bank
+        ? vietQrUrl(
+            bank,
+            per * (1 + r.guests),
+            `BongRo ${event.eventDate} ${r.member.name}`,
+          )
+        : null,
     }));
   }
 

@@ -1,0 +1,1 @@
+ALTER TABLE "host_profiles" DROP COLUMN "qr_image";

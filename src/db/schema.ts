@@ -26,7 +26,6 @@ export const hostProfiles = pgTable("host_profiles", {
   bankCode: text("bank_code").notNull().default(""),
   bankAccountNo: text("bank_account_no").notNull().default(""),
   bankAccountName: text("bank_account_name").notNull().default(""),
-  qrImage: text("qr_image"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
