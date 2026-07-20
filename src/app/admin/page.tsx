@@ -58,7 +58,7 @@ export default async function AdminPage() {
           href="/admin/hosts"
           className="rounded-xl border border-ink/12 bg-white py-2.5 text-center text-[13px] font-bold text-ink hover:bg-ink/3"
         >
-          🧑‍💼 Người nhận tiền
+          🧑‍💼 Quản lý
         </Link>
         <Link
           href="/admin/settings"
@@ -75,7 +75,7 @@ export default async function AdminPage() {
           </h2>
           <EventAdminPanel
             data={upcomingData}
-            settings={settings}
+            defaultHostId={settings.defaultHostId}
             hosts={hosts}
             showVoteReminders
           />
@@ -89,7 +89,7 @@ export default async function AdminPage() {
           </h2>
           <EventAdminPanel
             data={pastData}
-            settings={settings}
+            defaultHostId={settings.defaultHostId}
             hosts={hosts}
             showVoteReminders={false}
           />

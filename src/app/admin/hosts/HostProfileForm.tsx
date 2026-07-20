@@ -51,7 +51,7 @@ export function HostProfileForm({
     >
       {initial && <input type="hidden" name="hostId" value={initial.id} />}
       <div>
-        <label className={labelClass}>Tên người host</label>
+        <label className={labelClass}>Tên người quản lý</label>
         <input
           type="text"
           name="name"
@@ -158,7 +158,11 @@ export function HostProfileForm({
           disabled={pending || uploading}
           className="flex-1 rounded-xl bg-brand py-3 text-[14px] font-extrabold text-white transition hover:brightness-95 disabled:opacity-50"
         >
-          {pending ? "Đang lưu..." : initial ? "Lưu thay đổi" : "Thêm người host"}
+          {pending
+            ? "Đang lưu..."
+            : initial
+              ? "Lưu thay đổi"
+              : "Thêm người quản lý"}
         </button>
       </div>
       {showFlash && (

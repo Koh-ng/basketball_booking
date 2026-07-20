@@ -1,31 +1,21 @@
 import { db } from "@/db";
 import { settings } from "@/db/schema";
 import { sql } from "drizzle-orm";
-import type { BankInfo } from "./vietqr";
 
 export type AppSettings = {
-  bankCode: string;
-  bankAccountNo: string;
-  bankAccountName: string;
   adminEmail: string;
-  /** Ảnh QR chuyển khoản admin tự upload (data URI), ưu tiên hơn VietQR tự tạo nếu có. */
-  qrImage: string;
+  /** id (dạng chuỗi) của người quản lý mặc định — áp dụng cho buổi chưa chọn người thu tiền. */
+  defaultHostId: string;
 };
 
 const DEFAULTS: AppSettings = {
-  bankCode: "",
-  bankAccountNo: "",
-  bankAccountName: "",
   adminEmail: "",
-  qrImage: "",
+  defaultHostId: "",
 };
 
 const KEY_MAP: Record<keyof AppSettings, string> = {
-  bankCode: "bank_code",
-  bankAccountNo: "bank_account_no",
-  bankAccountName: "bank_account_name",
   adminEmail: "admin_email",
-  qrImage: "qr_image",
+  defaultHostId: "default_host_id",
 };
 
 export async function getSettings(): Promise<AppSettings> {
@@ -55,13 +45,4 @@ export async function saveSettings(values: Partial<AppSettings>) {
       target: settings.key,
       set: { value: sql`excluded.value` },
     });
-}
-
-export function bankInfoFrom(s: AppSettings): BankInfo | null {
-  if (!s.bankCode || !s.bankAccountNo) return null;
-  return {
-    bankCode: s.bankCode,
-    accountNo: s.bankAccountNo,
-    accountName: s.bankAccountName,
-  };
 }

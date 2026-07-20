@@ -41,7 +41,7 @@ export default async function AdminEventDetailPage({
       </h1>
       <EventAdminPanel
         data={data}
-        settings={settings}
+        defaultHostId={settings.defaultHostId}
         hosts={hosts}
         showVoteReminders={!isEventFinished(event)}
       />

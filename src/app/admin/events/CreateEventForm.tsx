@@ -4,11 +4,18 @@ import { useActionState } from "react";
 import type { HostProfile } from "@/lib/hostProfiles";
 import { createEventAction } from "../actions";
 
-export function CreateEventForm({ hosts }: { hosts: HostProfile[] }) {
+export function CreateEventForm({
+  hosts,
+  defaultHostId,
+}: {
+  hosts: HostProfile[];
+  defaultHostId: string;
+}) {
   const [state, formAction, pending] = useActionState(
     createEventAction,
     null,
   );
+  const defaultHost = hosts.find((h) => h.id === Number(defaultHostId));
 
   return (
     <form
@@ -39,10 +46,12 @@ export function CreateEventForm({ hosts }: { hosts: HostProfile[] }) {
           defaultValue=""
           className="rounded-[10px] border border-ink/15 px-3 py-2.5 text-[13px]"
         >
-          <option value="">🧑‍💼 Host — Mặc định (Cài đặt)</option>
+          <option value="">
+            🧑‍💼 Quản lý — Mặc định{defaultHost ? ` (${defaultHost.name})` : ""}
+          </option>
           {hosts.map((h) => (
             <option key={h.id} value={h.id}>
-              🧑‍💼 Host — {h.name}
+              🧑‍💼 Quản lý — {h.name}
             </option>
           ))}
         </select>

@@ -10,6 +10,7 @@ import {
   getUpcomingEvent,
   MIN_PLAYERS,
 } from "@/lib/events";
+import { getEffectiveHost } from "@/lib/hostProfiles";
 import {
   gameDayMessage,
   paymentReminderMessage,
@@ -123,6 +124,10 @@ export async function GET(req: NextRequest) {
       const data = await getEventVotes(event);
       const unpaid = data.rows.filter((r) => r.going === true && !r.paid);
       if (unpaid.length > 0) {
+        const host = await getEffectiveHost(
+          event.hostId,
+          settings.defaultHostId,
+        );
         const sent = await sendAdminEmail(
           adminEmail,
           `💸 Còn ${unpaid.length} người chưa chuyển tiền sân`,
@@ -131,7 +136,7 @@ export async function GET(req: NextRequest) {
             ``,
             `Tin nhắn soạn sẵn để dán vào group Messenger:`,
             `----------`,
-            paymentReminderMessage(data, settings),
+            paymentReminderMessage(data, host),
           ].join("\n"),
         );
         actions.push(`payment reminder email: ${sent ? "sent" : "skipped"}`);
