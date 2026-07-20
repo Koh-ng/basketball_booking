@@ -8,9 +8,9 @@ import { VotePanel } from "@/components/VotePanel";
 import { googleCalendarUrl } from "@/lib/calendar";
 import { formatDateVN } from "@/lib/dates";
 import { getEventById, getEventVotes, isEventFinished } from "@/lib/events";
-import { bankInfoFromHost, getHostProfile } from "@/lib/hostProfiles";
+import { bankInfoFromHost, getEffectiveHost } from "@/lib/hostProfiles";
 import { formatVND, perPersonAmount } from "@/lib/money";
-import { bankInfoFrom, getSettings } from "@/lib/settings";
+import { getSettings } from "@/lib/settings";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 import { vietQrUrl } from "@/lib/vietqr";
 
@@ -40,12 +40,10 @@ export default async function EventDetailPage({
   let paymentRows: PaymentRowClient[] = [];
   let bankLine: string | null = null;
   if (payable) {
-    const [settings, host] = await Promise.all([
-      getSettings(),
-      event.hostId ? getHostProfile(event.hostId) : null,
-    ]);
-    const bank = host ? bankInfoFromHost(host) : bankInfoFrom(settings);
-    const staticQr = (host ? host.qrImage : settings.qrImage) || null;
+    const settings = await getSettings();
+    const host = await getEffectiveHost(event.hostId, settings.defaultHostId);
+    const bank = host ? bankInfoFromHost(host) : null;
+    const staticQr = host?.qrImage || null;
     bankLine = bank
       ? `CK: ${bank.bankCode} ${bank.accountNo} (${bank.accountName})`
       : null;

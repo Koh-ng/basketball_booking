@@ -1,7 +1,7 @@
 import type { EventWithVotes } from "./events";
 import { formatDateVN } from "./dates";
+import type { HostProfile } from "./hostProfiles";
 import { formatVND, perPersonAmount } from "./money";
-import type { AppSettings } from "./settings";
 import { VENUE } from "./venue";
 
 function appUrl(): string {
@@ -59,7 +59,7 @@ export function gameDayMessage(data: EventWithVotes): string {
 /** Tin nhắn nhắc chuyển khoản cho buổi đã chốt tiền. */
 export function paymentReminderMessage(
   data: EventWithVotes,
-  settings: AppSettings,
+  host: HostProfile | null,
 ): string {
   const { event, rows, headCount } = data;
   const total = event.totalCost ?? 0;
@@ -76,13 +76,13 @@ export function paymentReminderMessage(
     ``,
     `Tổng chi: ${formatVND(total)} / ${headCount} người = ${formatVND(per)}/người`,
   ];
-  if (settings.bankAccountNo) {
+  if (host?.bankAccountNo) {
     lines.push(
       ``,
-      `Chuyển khoản: ${settings.bankCode} ${settings.bankAccountNo} (${settings.bankAccountName})`,
+      `Chuyển khoản: ${host.bankCode} ${host.bankAccountNo} (${host.bankAccountName})`,
     );
   }
-  if (settings.bankAccountNo || settings.qrImage) {
+  if (host?.bankAccountNo || host?.qrImage) {
     lines.push(`Quét mã QR trên app: ${appUrl()}`);
   }
   if (unpaid.length > 0) {

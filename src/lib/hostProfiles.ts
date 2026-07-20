@@ -31,3 +31,17 @@ export function bankInfoFromHost(h: HostProfile): BankInfo | null {
     accountName: h.bankAccountName,
   };
 }
+
+/**
+ * Người quản lý thực sự áp dụng cho 1 buổi: ưu tiên người được gán riêng cho
+ * buổi đó, nếu chưa gán thì dùng người quản lý mặc định (Cài đặt ở trang
+ * Quản lý). Không có cả hai thì null (không có QR).
+ */
+export async function getEffectiveHost(
+  eventHostId: number | null,
+  defaultHostId: string,
+): Promise<HostProfile | null> {
+  const id = eventHostId ?? (defaultHostId ? Number(defaultHostId) : null);
+  if (!id) return null;
+  return getHostProfile(id);
+}

@@ -201,15 +201,21 @@ export async function saveSettingsAction(
 ) {
   await requireAdmin();
   await saveSettings({
-    bankCode: String(formData.get("bankCode") ?? "").trim(),
-    bankAccountNo: String(formData.get("bankAccountNo") ?? "").trim(),
-    bankAccountName: String(formData.get("bankAccountName") ?? "").trim(),
     adminEmail: String(formData.get("adminEmail") ?? "").trim(),
-    qrImage: String(formData.get("qrImage") ?? "").trim(),
   });
   revalidateAll();
   revalidatePath("/admin/settings");
   return { ok: true };
+}
+
+/** Chọn người quản lý mặc định — áp dụng cho buổi chưa gán người thu tiền riêng. */
+export async function setDefaultHostAction(formData: FormData) {
+  await requireAdmin();
+  const hostId = String(formData.get("defaultHostId") ?? "").trim();
+  await saveSettings({ defaultHostId: hostId });
+  revalidateAll();
+  revalidatePath("/admin/hosts");
+  revalidatePath("/admin/events");
 }
 
 /** Tạo mới (không có hostId) hoặc cập nhật (có hostId) 1 profile host. */
@@ -237,7 +243,7 @@ export async function saveHostProfileAction(
         : eq(hostProfiles.name, name),
     )
     .limit(1);
-  if (dup[0]) return { ok: false, error: "Đã có người host tên này rồi" };
+  if (dup[0]) return { ok: false, error: "Đã có người quản lý tên này rồi" };
 
   if (hostId) {
     await db
@@ -247,7 +253,10 @@ export async function saveHostProfileAction(
   } else {
     const count = await db.$count(hostProfiles);
     if (count >= MAX_HOST_PROFILES) {
-      return { ok: false, error: `Tối đa ${MAX_HOST_PROFILES} người host` };
+      return {
+        ok: false,
+        error: `Tối đa ${MAX_HOST_PROFILES} người quản lý`,
+      };
     }
     await db
       .insert(hostProfiles)

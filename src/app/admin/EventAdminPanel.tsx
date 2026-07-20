@@ -7,7 +7,6 @@ import {
   voteReminderMessage,
 } from "@/lib/messages";
 import { formatVND, perPersonAmount } from "@/lib/money";
-import type { AppSettings } from "@/lib/settings";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 import {
   setEventHostAction,
@@ -45,12 +44,12 @@ function StatusForm({
  */
 export function EventAdminPanel({
   data,
-  settings,
+  defaultHostId,
   hosts,
   showVoteReminders,
 }: {
   data: EventWithVotes;
-  settings: AppSettings;
+  defaultHostId: string;
   hosts: HostProfile[];
   showVoteReminders: boolean;
 }) {
@@ -59,16 +58,11 @@ export function EventAdminPanel({
     ? perPersonAmount(event.totalCost, data.headCount)
     : 0;
   const going = data.rows.filter((r) => r.going === true);
-  const currentHost = hosts.find((h) => h.id === event.hostId) ?? null;
-  const reminderSettings: AppSettings = currentHost
-    ? {
-        ...settings,
-        bankCode: currentHost.bankCode,
-        bankAccountNo: currentHost.bankAccountNo,
-        bankAccountName: currentHost.bankAccountName,
-        qrImage: currentHost.qrImage ?? "",
-      }
-    : settings;
+  const defaultHost =
+    hosts.find((h) => h.id === Number(defaultHostId)) ?? null;
+  const effectiveHostId = event.hostId ?? defaultHost?.id ?? null;
+  const effectiveHost =
+    hosts.find((h) => h.id === effectiveHostId) ?? null;
 
   return (
     <section className="rounded-2xl border border-ink/8 bg-white p-4">
@@ -90,14 +84,16 @@ export function EventAdminPanel({
         >
           <input type="hidden" name="eventId" value={event.id} />
           <label className="shrink-0 text-[12px] font-bold text-ink/55">
-            🧑‍💼 Host nhận tiền:
+            🧑‍💼 Quản lý nhận tiền:
           </label>
           <select
             name="hostId"
             defaultValue={event.hostId ?? ""}
             className="flex-1 rounded-[10px] border border-ink/15 px-2.5 py-2 text-[12.5px]"
           >
-            <option value="">— Mặc định (Cài đặt) —</option>
+            <option value="">
+              — Mặc định{defaultHost ? ` (${defaultHost.name})` : ""} —
+            </option>
             {hosts.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
@@ -235,7 +231,7 @@ export function EventAdminPanel({
             <div className="flex flex-wrap gap-2">
               <CopyButton
                 label="📋 Copy tin nhắc chuyển khoản"
-                text={paymentReminderMessage(data, reminderSettings)}
+                text={paymentReminderMessage(data, effectiveHost)}
               />
               {event.status === "settled" && (
                 <form action={unsettleEventAction}>
