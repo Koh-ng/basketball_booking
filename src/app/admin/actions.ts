@@ -231,7 +231,6 @@ export async function saveHostProfileAction(
   const bankCode = String(formData.get("bankCode") ?? "").trim();
   const bankAccountNo = String(formData.get("bankAccountNo") ?? "").trim();
   const bankAccountName = String(formData.get("bankAccountName") ?? "").trim();
-  const qrImage = String(formData.get("qrImage") ?? "").trim();
   if (!name) return { ok: false, error: "Tên không được để trống" };
 
   const dup = await db
@@ -248,7 +247,7 @@ export async function saveHostProfileAction(
   if (hostId) {
     await db
       .update(hostProfiles)
-      .set({ name, bankCode, bankAccountNo, bankAccountName, qrImage })
+      .set({ name, bankCode, bankAccountNo, bankAccountName })
       .where(eq(hostProfiles.id, hostId));
   } else {
     const count = await db.$count(hostProfiles);
@@ -260,7 +259,7 @@ export async function saveHostProfileAction(
     }
     await db
       .insert(hostProfiles)
-      .values({ name, bankCode, bankAccountNo, bankAccountName, qrImage });
+      .values({ name, bankCode, bankAccountNo, bankAccountName });
   }
   revalidateAll();
   revalidatePath("/admin/hosts");

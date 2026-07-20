@@ -82,7 +82,7 @@ export function paymentReminderMessage(
       `Chuyển khoản: ${host.bankCode} ${host.bankAccountNo} (${host.bankAccountName})`,
     );
   }
-  if (host?.bankAccountNo || host?.qrImage) {
+  if (host?.bankAccountNo) {
     lines.push(`Quét mã QR trên app: ${appUrl()}`);
   }
   if (unpaid.length > 0) {
