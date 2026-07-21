@@ -8,12 +8,15 @@ import {
   getEventVotes,
   getLatestPastEvent,
   getUpcomingEvent,
+  isEventFinished,
   MIN_PLAYERS,
 } from "@/lib/events";
 import { getEffectiveHost } from "@/lib/hostProfiles";
 import {
   gameDayMessage,
+  participationSummaryMessage,
   paymentReminderMessage,
+  paymentStatusMessage,
   voteReminderMessage,
 } from "@/lib/messages";
 import { getSettings } from "@/lib/settings";
@@ -25,8 +28,10 @@ export const dynamic = "force-dynamic";
  * Tự quyết định việc theo thứ trong tuần (giờ VN):
  *  - Hàng ngày: đảm bảo tồn tại buổi cho Chủ nhật sắp tới
  *  - Hàng ngày: xoá vĩnh viễn các buổi đã hủy quá 30 ngày
+ *  - Thứ 5: email báo admin số người tham gia buổi Chủ nhật tuần này
  *  - Thứ 6: email nhắc admin đăng tin vote + book sân
  *  - Chủ nhật: email nhắc giờ chơi (8h sáng, chơi lúc 10h)
+ *  - Thứ 2: email báo admin ai đã / chưa chuyển tiền buổi vừa rồi
  *  - Thứ 3: email nhắc thu tiền nếu còn người chưa chuyển khoản
  */
 export async function GET(req: NextRequest) {
@@ -51,6 +56,32 @@ export async function GET(req: NextRequest) {
     "ensured upcoming event",
     `deleted ${deletedCount} old cancelled event(s)`,
   ];
+
+  if (weekday === 4) {
+    // Thứ 5: báo admin số người tham gia buổi Chủ nhật tuần này
+    const event = await getUpcomingEvent();
+    if (event && event.status === "open") {
+      const data = await getEventVotes(event);
+      const enough = data.headCount >= MIN_PLAYERS;
+      const sent = await sendAdminEmail(
+        adminEmail,
+        `🏀 Chủ nhật này có ${data.headCount} người đi bóng`,
+        [
+          `Sắp tới buổi Chủ nhật ${event.eventDate}. Hiện có ${data.headCount} người chốt đi` +
+            (data.guestCount > 0 ? ` (gồm ${data.guestCount} khách)` : "") +
+            ".",
+          enough
+            ? `Đủ người rồi, nhớ book sân nhé!`
+            : `⚠️ Chưa đủ ${MIN_PLAYERS} người — thứ 7 app sẽ tự hủy nếu vẫn thiếu.`,
+          ``,
+          `Chi tiết:`,
+          `----------`,
+          participationSummaryMessage(data),
+        ].join("\n"),
+      );
+      actions.push(`participation summary email: ${sent ? "sent" : "skipped"}`);
+    }
+  }
 
   if (weekday === 5) {
     // Thứ 6: nhắc vote + book sân
@@ -114,6 +145,50 @@ export async function GET(req: NextRequest) {
         ].join("\n"),
       );
       actions.push(`game day email: ${sent ? "sent" : "skipped"}`);
+    }
+  }
+
+  if (weekday === 1) {
+    // Thứ 2: báo admin ai đã / chưa chuyển tiền buổi vừa rồi
+    const event = await getLatestPastEvent();
+    if (event && isEventFinished(event) && event.status !== "cancelled") {
+      if (
+        (event.status === "settled" || event.status === "completed") &&
+        event.totalCost != null
+      ) {
+        const data = await getEventVotes(event);
+        const paidCount = data.rows.filter(
+          (r) => r.going === true && r.paid,
+        ).length;
+        const host = await getEffectiveHost(
+          event.hostId,
+          settings.defaultHostId,
+        );
+        const sent = await sendAdminEmail(
+          adminEmail,
+          `💸 Tiền sân ${event.eventDate}: đã thu ${paidCount}/${data.goingCount} người`,
+          [
+            paymentStatusMessage(data),
+            ``,
+            `Tin nhắn nhắc chuyển khoản (dán vào group Messenger nếu cần):`,
+            `----------`,
+            paymentReminderMessage(data, host),
+          ].join("\n"),
+        );
+        actions.push(`payment status email: ${sent ? "sent" : "skipped"}`);
+      } else {
+        // Buổi đã đá xong nhưng chưa nhập tổng chi -> nhắc admin chốt tiền
+        const sent = await sendAdminEmail(
+          adminEmail,
+          `⏳ Nhắc chốt tiền sân buổi ${event.eventDate}`,
+          [
+            `Buổi ${event.eventDate} đã đá xong nhưng chưa nhập tổng chi phí để chia tiền.`,
+            ``,
+            `Vào trang Quản lý nhập tổng chi để bắt đầu thu tiền nhé: ${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin`,
+          ].join("\n"),
+        );
+        actions.push(`settle reminder email: ${sent ? "sent" : "skipped"}`);
+      }
     }
   }
 
