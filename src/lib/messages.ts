@@ -56,6 +56,60 @@ export function gameDayMessage(data: EventWithVotes): string {
   ].join("\n");
 }
 
+/** Tóm tắt số người tham gia (thứ 5) — cho admin nắm trước buổi. */
+export function participationSummaryMessage(data: EventWithVotes): string {
+  const { event, rows, headCount, goingCount, guestCount } = data;
+  const going = rows
+    .filter((r) => r.going === true)
+    .map((r) => nameWithGuests(r.member.name, r.guests, r.guestNames));
+  const notVoted = rows
+    .filter((r) => r.going === null)
+    .map((r) => r.member.name);
+  const notGoing = rows
+    .filter((r) => r.going === false)
+    .map((r) => r.member.name);
+  const lines = [
+    `🏀 BUỔI CHỦ NHẬT ${formatDateVN(event.eventDate)} — hiện có ${headCount} người tham gia` +
+      (guestCount > 0
+        ? ` (${goingCount} thành viên + ${guestCount} khách)`
+        : ""),
+    ``,
+    `✅ Đi (${headCount}): ${going.join(", ") || "chưa có ai"}`,
+  ];
+  if (notVoted.length > 0) {
+    lines.push(`❓ Chưa vote (${notVoted.length}): ${notVoted.join(", ")}`);
+  }
+  if (notGoing.length > 0) {
+    lines.push(`❌ Không đi (${notGoing.length}): ${notGoing.join(", ")}`);
+  }
+  return lines.join("\n");
+}
+
+/** Ai đã / chưa chuyển tiền (thứ 2) — cho admin theo dõi sau buổi. */
+export function paymentStatusMessage(data: EventWithVotes): string {
+  const { event, rows, headCount } = data;
+  const total = event.totalCost ?? 0;
+  const per = perPersonAmount(total, headCount);
+  const going = rows.filter((r) => r.going === true);
+  const paid = going.filter((r) => r.paid).map((r) => r.member.name);
+  const unpaid = going
+    .filter((r) => !r.paid)
+    .map((r) => `${r.member.name} (${formatVND(per * (1 + r.guests))})`);
+  const lines = [
+    `💸 TIỀN SÂN ${formatDateVN(event.eventDate)} — đã thu ${paid.length}/${going.length} người`,
+    ``,
+  ];
+  if (unpaid.length > 0) {
+    lines.push(`⏳ Chưa chuyển (${unpaid.length}): ${unpaid.join(", ")}`);
+  } else {
+    lines.push(`✅ Tất cả đã chuyển khoản, xong xuôi!`);
+  }
+  if (paid.length > 0) {
+    lines.push(`✔️ Đã chuyển (${paid.length}): ${paid.join(", ")}`);
+  }
+  return lines.join("\n");
+}
+
 /** Tin nhắn nhắc chuyển khoản cho buổi đã chốt tiền. */
 export function paymentReminderMessage(
   data: EventWithVotes,
