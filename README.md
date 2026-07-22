@@ -38,10 +38,34 @@ npm run dev                   # mở http://localhost:3000
    Bảng (`events`, `members`, `votes`, `settings`) được tự động tạo trong lúc Vercel build (script `vercel-build` chạy `drizzle-kit migrate` trước `next build`) — không cần chạy migration tay.
 3. **Thêm thành viên**: sau khi deploy xong, vào `/admin/members` (đăng nhập bằng `ADMIN_PIN`) để thêm tên từng người trong đội — không cần seed sẵn.
 4. **Cron tự chạy**: `vercel.json` đã khai báo cron mỗi ngày lúc 8h sáng VN — Vercel tự gắn header `Authorization: Bearer $CRON_SECRET`. Cron sẽ:
-   - hàng ngày: đảm bảo tồn tại kèo cho Chủ nhật sắp tới
+   - hàng ngày: đảm bảo tồn tại buổi cho Chủ nhật sắp tới + xoá buổi đã hủy quá 30 ngày
+   - **thứ 5**: email báo admin số người tham gia buổi Chủ nhật tuần này
    - thứ 6: email nhắc bạn đăng tin vote + book sân
+   - thứ 7: tự hủy buổi nếu chưa đủ người (mặc định 8)
    - Chủ nhật 8h: email nhắc giờ chơi kèm danh sách chốt
+   - **thứ 2**: email báo admin ai đã / chưa chuyển tiền buổi vừa rồi
    - thứ 3: email nhắc thu tiền nếu còn người chưa chuyển
+
+   > ⚠️ Các email chỉ gửi được khi đã có `RESEND_API_KEY` **và** người nhận
+   > (`ADMIN_EMAIL` env hoặc email admin trong trang Cài đặt). Thiếu 1 trong 2 thì
+   > cron vẫn chạy nhưng bỏ qua việc gửi mail (không báo lỗi).
+
+### Test thử cron ở local
+
+Endpoint cron nhận query `?simulate=<thứ>` để giả lập thứ trong tuần —
+**chỉ hoạt động ở local dev** (`NODE_ENV !== "production"`), không dùng được trên
+bản deploy. `0` = Chủ nhật … `6` = thứ 7. Nhớ gắn header `CRON_SECRET`:
+
+```bash
+# chạy dev server trước: npm run dev
+# thứ 5 — email số người tham gia
+curl -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron?simulate=4"
+# thứ 2 — email ai đã/chưa chuyển tiền
+curl -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron?simulate=1"
+```
+
+Phản hồi JSON có mảng `actions` cho biết email đã `sent` hay `skipped`
+(`skipped` = chưa cấu hình `RESEND_API_KEY`/email nhận).
 
 ## Sử dụng hàng tuần
 
@@ -57,7 +81,7 @@ Vào `/admin` (đăng nhập bằng `ADMIN_PIN`):
 
 - **Thành viên**: thêm / ẩn thành viên
 - **Cài đặt**: mã ngân hàng + số tài khoản + tên chủ TK (để tạo QR VietQR), email nhận nhắc nhở
-- **Kèo**: hủy kèo (mưa gió...), ghi chú sân, sửa lại tổng chi phí
+- **Buổi**: hủy buổi (mưa gió...), ghi chú sân, sửa lại tổng chi phí
 
 ## Scripts
 
