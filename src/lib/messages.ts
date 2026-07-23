@@ -1,3 +1,4 @@
+import type { Event } from "@/db/schema";
 import type { EventWithVotes } from "./events";
 import { formatDateVN } from "./dates";
 import type { HostProfile } from "./hostProfiles";
@@ -6,6 +7,20 @@ import { VENUE } from "./venue";
 
 function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "";
+}
+
+/** "10:00" -> "10h", "10:30" -> "10h30" */
+function formatHourVN(time: string): string {
+  const [h, m] = time.split(":");
+  return m === "00" ? `${Number(h)}h` : `${Number(h)}h${m}`;
+}
+
+/** Tin nhắn nhắn admin sân xin đặt sân cho buổi — dán vào chat với admin sân. */
+export function courtBookingMessage(event: Event): string {
+  const [, m, day] = event.eventDate.split("-");
+  const start = formatHourVN(event.startTime);
+  const end = formatHourVN(event.endTime);
+  return `cho mình đặt sân ngày ${Number(day)}/${Number(m)} bóng rổ ${start}-${end} 1 rổ quận 8 nha ad`;
 }
 
 /** Tin nhắn nhắc vote (thứ 6) — dán vào group Messenger. */

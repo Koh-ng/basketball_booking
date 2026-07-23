@@ -2,6 +2,7 @@ import { CopyButton } from "@/components/CopyButton";
 import type { EventWithVotes } from "@/lib/events";
 import type { HostProfile } from "@/lib/hostProfiles";
 import {
+  courtBookingMessage,
   gameDayMessage,
   paymentReminderMessage,
   voteReminderMessage,
@@ -131,6 +132,11 @@ export function EventAdminPanel({
         <div className="space-y-3">
           {showVoteReminders && (
             <div className="flex flex-col gap-2">
+              <CopyButton
+                className="w-full"
+                label="📋 Copy tin đặt sân"
+                text={courtBookingMessage(event)}
+              />
               <CopyButton
                 className="w-full"
                 label="📋 Copy tin nhắc vote"
