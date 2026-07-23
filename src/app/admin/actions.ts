@@ -11,11 +11,13 @@ import {
   setAdminCookie,
   verifyPin,
 } from "@/lib/auth";
+import { sendAdminEmail } from "@/lib/email";
 import { castVote, setPaid } from "@/lib/events";
 import type { FeedbackStatus } from "@/lib/feedback";
 import { MAX_HOST_PROFILES } from "@/lib/hostProfiles";
 import { resetMemberPin } from "@/lib/memberAuth";
-import { saveSettings } from "@/lib/settings";
+import { courtBookingMessage } from "@/lib/messages";
+import { getSettings, saveSettings } from "@/lib/settings";
 import type { EventStatus } from "@/lib/status";
 
 const EVENT_STATUSES: readonly EventStatus[] = [
@@ -348,4 +350,40 @@ export async function toggleFeedbackStatusAction(formData: FormData) {
   if (!feedbackId || (status !== "new" && status !== "reviewed")) return;
   await db.update(feedback).set({ status }).where(eq(feedback.id, feedbackId));
   revalidatePath("/admin/feedback");
+}
+
+/** Gửi ngay email đặt sân cho buổi này (dùng email nhận nhắc nhở ở Cài đặt). */
+export async function sendCourtBookingEmailAction(
+  _prev: { ok: boolean; error?: string } | null,
+  formData: FormData,
+) {
+  await requireAdmin();
+  const eventId = Number(formData.get("eventId"));
+  if (!eventId) return { ok: false, error: "Thiếu buổi" };
+
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(eq(events.id, eventId))
+    .limit(1);
+  if (!event) return { ok: false, error: "Không tìm thấy buổi" };
+
+  const settings = await getSettings();
+  const to = settings.adminEmail || process.env.ADMIN_EMAIL || "";
+  if (!to) {
+    return { ok: false, error: "Chưa có email nhận — vào Cài đặt để thêm" };
+  }
+
+  const sent = await sendAdminEmail(
+    to,
+    `🏀 Đặt sân buổi ${event.eventDate}`,
+    courtBookingMessage(event),
+  );
+  if (!sent) {
+    return {
+      ok: false,
+      error: "Gửi email thất bại — kiểm tra lại RESEND_API_KEY",
+    };
+  }
+  return { ok: true };
 }
