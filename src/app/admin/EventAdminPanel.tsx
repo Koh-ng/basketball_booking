@@ -10,7 +10,6 @@ import {
 import { formatVND, perPersonAmount } from "@/lib/money";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 import { AttendanceEditor } from "./AttendanceEditor";
-import { SendBookingEmailButton } from "./SendBookingEmailButton";
 import {
   setEventHostAction,
   setEventStatusAction,
@@ -133,14 +132,11 @@ export function EventAdminPanel({
         <div className="space-y-3">
           {showVoteReminders && (
             <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <CopyButton
-                  className="flex-1"
-                  label="📋 Copy tin đặt sân"
-                  text={courtBookingMessage(event)}
-                />
-                <SendBookingEmailButton eventId={event.id} />
-              </div>
+              <CopyButton
+                className="w-full"
+                label="📋 Copy tin đặt sân"
+                text={courtBookingMessage(event)}
+              />
               <CopyButton
                 className="w-full"
                 label="📋 Copy tin nhắc vote"
