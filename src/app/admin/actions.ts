@@ -11,7 +11,7 @@ import {
   setAdminCookie,
   verifyPin,
 } from "@/lib/auth";
-import { sendAdminEmail } from "@/lib/email";
+import { parseEmailList, sendAdminEmail } from "@/lib/email";
 import { castVote, setPaid } from "@/lib/events";
 import type { FeedbackStatus } from "@/lib/feedback";
 import { MAX_HOST_PROFILES } from "@/lib/hostProfiles";
@@ -369,8 +369,10 @@ export async function sendCourtBookingEmailAction(
   if (!event) return { ok: false, error: "Không tìm thấy buổi" };
 
   const settings = await getSettings();
-  const to = settings.adminEmail || process.env.ADMIN_EMAIL || "";
-  if (!to) {
+  const to = parseEmailList(
+    settings.adminEmail || process.env.ADMIN_EMAIL || "",
+  );
+  if (to.length === 0) {
     return { ok: false, error: "Chưa có email nhận — vào Cài đặt để thêm" };
   }
 
