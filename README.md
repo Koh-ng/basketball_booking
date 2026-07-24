@@ -39,11 +39,11 @@ npm run dev                   # mở http://localhost:3000
 3. **Thêm thành viên**: sau khi deploy xong, vào `/admin/members` (đăng nhập bằng `ADMIN_PIN`) để thêm tên từng người trong đội — không cần seed sẵn.
 4. **Cron tự chạy**: `vercel.json` đã khai báo cron mỗi ngày lúc 8h sáng VN — Vercel tự gắn header `Authorization: Bearer $CRON_SECRET`. Cron sẽ:
    - hàng ngày: đảm bảo tồn tại buổi cho Chủ nhật sắp tới + xoá buổi đã hủy quá 30 ngày
-   - **thứ 5**: email báo admin số người tham gia buổi Chủ nhật tuần này
+   - **thứ 5**: email nhắc đặt sân cho buổi Chủ nhật tuần này (kèm tin đặt sân soạn sẵn)
    - thứ 6: email nhắc bạn đăng tin vote + book sân
    - thứ 7: tự hủy buổi nếu chưa đủ người (mặc định 8)
    - Chủ nhật 8h: email nhắc giờ chơi kèm danh sách chốt
-   - **thứ 2**: email báo admin ai đã / chưa chuyển tiền buổi vừa rồi
+   - **thứ 2**: email nhắc ai chưa chuyển tiền buổi vừa rồi + nhắc vote buổi sắp tới
    - thứ 3: email nhắc thu tiền nếu còn người chưa chuyển
 
    > ⚠️ Các email chỉ gửi được khi đã có `RESEND_API_KEY` **và** người nhận

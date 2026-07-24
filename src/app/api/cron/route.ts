@@ -13,6 +13,7 @@ import {
 } from "@/lib/events";
 import { getEffectiveHost } from "@/lib/hostProfiles";
 import {
+  courtBookingMessage,
   gameDayMessage,
   participationSummaryMessage,
   paymentReminderMessage,
@@ -28,10 +29,10 @@ export const dynamic = "force-dynamic";
  * Tự quyết định việc theo thứ trong tuần (giờ VN):
  *  - Hàng ngày: đảm bảo tồn tại buổi cho Chủ nhật sắp tới
  *  - Hàng ngày: xoá vĩnh viễn các buổi đã hủy quá 30 ngày
- *  - Thứ 5: email báo admin số người tham gia buổi Chủ nhật tuần này
+ *  - Thứ 5: email nhắc đặt sân cho buổi Chủ nhật tuần này (kèm tin đặt sân soạn sẵn)
  *  - Thứ 6: email nhắc admin đăng tin vote + book sân
  *  - Chủ nhật: email nhắc giờ chơi (8h sáng, chơi lúc 10h)
- *  - Thứ 2: email báo admin ai đã / chưa chuyển tiền buổi vừa rồi
+ *  - Thứ 2: email nhắc ai chưa chuyển tiền buổi vừa rồi + nhắc vote buổi sắp tới
  *  - Thứ 3: email nhắc thu tiền nếu còn người chưa chuyển khoản
  */
 export async function GET(req: NextRequest) {
@@ -58,28 +59,32 @@ export async function GET(req: NextRequest) {
   ];
 
   if (weekday === 4) {
-    // Thứ 5: báo admin số người tham gia buổi Chủ nhật tuần này
+    // Thứ 5: nhắc đặt sân cho buổi Chủ nhật tuần này
     const event = await getUpcomingEvent();
     if (event && event.status === "open") {
       const data = await getEventVotes(event);
       const enough = data.headCount >= MIN_PLAYERS;
       const sent = await sendAdminEmail(
         adminEmail,
-        `🏀 Chủ nhật này có ${data.headCount} người đi bóng`,
+        `🏀 Nhắc đặt sân — Chủ nhật ${event.eventDate} (${data.headCount} người)`,
         [
           `Sắp tới buổi Chủ nhật ${event.eventDate}. Hiện có ${data.headCount} người chốt đi` +
             (data.guestCount > 0 ? ` (gồm ${data.guestCount} khách)` : "") +
             ".",
           enough
-            ? `Đủ người rồi, nhớ book sân nhé!`
+            ? `Đủ người rồi, nhớ đặt sân nhé!`
             : `⚠️ Chưa đủ ${MIN_PLAYERS} người — thứ 7 app sẽ tự hủy nếu vẫn thiếu.`,
           ``,
-          `Chi tiết:`,
+          `Tin nhắn đặt sân (dán cho admin sân):`,
+          `----------`,
+          courtBookingMessage(event),
+          ``,
+          `Chi tiết người tham gia:`,
           `----------`,
           participationSummaryMessage(data),
         ].join("\n"),
       );
-      actions.push(`participation summary email: ${sent ? "sent" : "skipped"}`);
+      actions.push(`court booking reminder email: ${sent ? "sent" : "skipped"}`);
     }
   }
 
@@ -149,25 +154,31 @@ export async function GET(req: NextRequest) {
   }
 
   if (weekday === 1) {
-    // Thứ 2: báo admin ai đã / chưa chuyển tiền buổi vừa rồi
-    const event = await getLatestPastEvent();
-    if (event && isEventFinished(event) && event.status !== "cancelled") {
+    // Thứ 2: nhắc ai chưa chuyển tiền buổi vừa rồi + nhắc vote buổi sắp tới
+    const sections: string[] = [];
+
+    const pastEvent = await getLatestPastEvent();
+    if (
+      pastEvent &&
+      isEventFinished(pastEvent) &&
+      pastEvent.status !== "cancelled"
+    ) {
       if (
-        (event.status === "settled" || event.status === "completed") &&
-        event.totalCost != null
+        (pastEvent.status === "settled" || pastEvent.status === "completed") &&
+        pastEvent.totalCost != null
       ) {
-        const data = await getEventVotes(event);
+        const data = await getEventVotes(pastEvent);
         const paidCount = data.rows.filter(
           (r) => r.going === true && r.paid,
         ).length;
         const host = await getEffectiveHost(
-          event.hostId,
+          pastEvent.hostId,
           settings.defaultHostId,
         );
-        const sent = await sendAdminEmail(
-          adminEmail,
-          `💸 Tiền sân ${event.eventDate}: đã thu ${paidCount}/${data.goingCount} người`,
+        sections.push(
           [
+            `💸 TIỀN SÂN ${pastEvent.eventDate}: đã thu ${paidCount}/${data.goingCount} người`,
+            ``,
             paymentStatusMessage(data),
             ``,
             `Tin nhắn nhắc chuyển khoản (dán vào group Messenger nếu cần):`,
@@ -175,20 +186,38 @@ export async function GET(req: NextRequest) {
             paymentReminderMessage(data, host),
           ].join("\n"),
         );
-        actions.push(`payment status email: ${sent ? "sent" : "skipped"}`);
       } else {
         // Buổi đã đá xong nhưng chưa nhập tổng chi -> nhắc admin chốt tiền
-        const sent = await sendAdminEmail(
-          adminEmail,
-          `⏳ Nhắc chốt tiền sân buổi ${event.eventDate}`,
+        sections.push(
           [
-            `Buổi ${event.eventDate} đã đá xong nhưng chưa nhập tổng chi phí để chia tiền.`,
-            ``,
+            `⏳ Buổi ${pastEvent.eventDate} đã đá xong nhưng chưa nhập tổng chi phí để chia tiền.`,
             `Vào trang Quản lý nhập tổng chi để bắt đầu thu tiền nhé: ${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin`,
           ].join("\n"),
         );
-        actions.push(`settle reminder email: ${sent ? "sent" : "skipped"}`);
       }
+    }
+
+    const upcoming = await getUpcomingEvent();
+    if (upcoming && upcoming.status === "open") {
+      const data = await getEventVotes(upcoming);
+      sections.push(
+        [
+          `🗳️ NHẮC VOTE — buổi Chủ nhật ${upcoming.eventDate} (hiện có ${data.headCount} người chốt đi)`,
+          ``,
+          `Tin nhắn nhắc vote (dán vào group Messenger nếu cần):`,
+          `----------`,
+          voteReminderMessage(data),
+        ].join("\n"),
+      );
+    }
+
+    if (sections.length > 0) {
+      const sent = await sendAdminEmail(
+        adminEmail,
+        `🏀 Đầu tuần: tiền sân + nhắc vote`,
+        sections.join("\n\n==========\n\n"),
+      );
+      actions.push(`monday summary email: ${sent ? "sent" : "skipped"}`);
     }
   }
 
