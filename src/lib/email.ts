@@ -8,18 +8,22 @@ export function parseEmailList(raw: string): string[] {
     .filter(Boolean);
 }
 
-/**
- * Gửi email nhắc admin (1 hoặc nhiều người nhận). Bỏ qua êm thấm nếu chưa
- * cấu hình RESEND_API_KEY hoặc chưa có email nhận.
- */
+export type SendEmailResult = { ok: true } | { ok: false; error: string };
+
+/** Gửi email nhắc admin (1 hoặc nhiều người nhận). Trả kèm lý do nếu thất bại. */
 export async function sendAdminEmail(
   to: string | string[],
   subject: string,
   body: string,
-): Promise<boolean> {
+): Promise<SendEmailResult> {
   const recipients = Array.isArray(to) ? to : parseEmailList(to);
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || recipients.length === 0) return false;
+  if (!apiKey) {
+    return { ok: false, error: "Chưa cấu hình RESEND_API_KEY" };
+  }
+  if (recipients.length === 0) {
+    return { ok: false, error: "Chưa có email nhận" };
+  }
   const resend = new Resend(apiKey);
   const from = process.env.EMAIL_FROM ?? "Bóng Rổ <onboarding@resend.dev>";
   const { error } = await resend.emails.send({
@@ -30,7 +34,7 @@ export async function sendAdminEmail(
   });
   if (error) {
     console.error("Gửi email thất bại:", error);
-    return false;
+    return { ok: false, error: `${error.name}: ${error.message}` };
   }
-  return true;
+  return { ok: true };
 }
