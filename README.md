@@ -9,7 +9,7 @@ Web app cho đội bóng rổ chơi cố định **sáng Chủ nhật 10h–12h*
 
 ## Tech stack
 
-Next.js (App Router) · Tailwind CSS · Drizzle ORM · PostgreSQL (Neon) · Vercel Cron · Resend (email) · VietQR
+Next.js (App Router) · Tailwind CSS · Drizzle ORM · PostgreSQL (Neon) · Vercel Cron · Gmail SMTP (email) · VietQR
 
 ## Chạy local
 
@@ -31,9 +31,16 @@ npm run dev                   # mở http://localhost:3000
    | `DATABASE_URL` | connection string của Neon |
    | `ADMIN_PIN` | mã PIN đăng nhập trang `/admin` |
    | `CRON_SECRET` | chuỗi ngẫu nhiên dài (bảo vệ endpoint cron) |
-   | `RESEND_API_KEY` | API key từ [resend.com](https://resend.com) (bỏ trống nếu chưa cần email) |
+   | `GMAIL_USER` | địa chỉ Gmail dùng để gửi email nhắc (bỏ trống nếu chưa cần email) |
+   | `GMAIL_APP_PASSWORD` | mật khẩu ứng dụng 16 ký tự — xem cách tạo bên dưới |
    | `ADMIN_EMAIL` | email của bạn để nhận nhắc nhở |
    | `NEXT_PUBLIC_APP_URL` | URL app sau khi deploy, VD `https://bongro.vercel.app` |
+
+   > 💌 Gửi email qua Gmail SMTP — miễn phí, gửi được tới bất kỳ ai, không
+   > cần mua domain hay verify gì cả (khác Resend/SendGrid vốn chặn gửi tới
+   > người lạ nếu chưa verify domain riêng). Cách tạo mật khẩu ứng dụng:
+   > 1. Bật **xác minh 2 bước** cho tài khoản Gmail sẽ dùng để gửi (myaccount.google.com/security)
+   > 2. Vào [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) → tạo mật khẩu ứng dụng mới → copy 16 ký tự đó vào `GMAIL_APP_PASSWORD`
 
    Bảng (`events`, `members`, `votes`, `settings`) được tự động tạo trong lúc Vercel build (script `vercel-build` chạy `drizzle-kit migrate` trước `next build`) — không cần chạy migration tay.
 3. **Thêm thành viên**: sau khi deploy xong, vào `/admin/members` (đăng nhập bằng `ADMIN_PIN`) để thêm tên từng người trong đội — không cần seed sẵn.
@@ -46,9 +53,10 @@ npm run dev                   # mở http://localhost:3000
    - **thứ 2**: email nhắc ai chưa chuyển tiền buổi vừa rồi + nhắc vote buổi sắp tới
    - thứ 3: email nhắc thu tiền nếu còn người chưa chuyển
 
-   > ⚠️ Các email chỉ gửi được khi đã có `RESEND_API_KEY` **và** người nhận
-   > (`ADMIN_EMAIL` env hoặc email admin trong trang Cài đặt). Thiếu 1 trong 2 thì
-   > cron vẫn chạy nhưng bỏ qua việc gửi mail (không báo lỗi).
+   > ⚠️ Các email chỉ gửi được khi đã có `GMAIL_USER`/`GMAIL_APP_PASSWORD` **và**
+   > người nhận (`ADMIN_EMAIL` env hoặc email admin trong trang Cài đặt). Thiếu
+   > thì cron vẫn chạy nhưng bỏ qua việc gửi mail, có ghi lý do cụ thể trong
+   > `actions` của response JSON (xem mục test cron bên dưới).
 
 ### Test thử cron ở local
 
@@ -64,8 +72,9 @@ curl -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron?sim
 curl -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron?simulate=1"
 ```
 
-Phản hồi JSON có mảng `actions` cho biết email đã `sent` hay `skipped`
-(`skipped` = chưa cấu hình `RESEND_API_KEY`/email nhận).
+Phản hồi JSON có mảng `actions` cho biết email đã `sent` hay
+`skipped (lý do cụ thể)` — ví dụ thiếu `GMAIL_APP_PASSWORD`, chưa có email
+nhận, hoặc lỗi trả về từ Gmail.
 
 ## Sử dụng hàng tuần
 
