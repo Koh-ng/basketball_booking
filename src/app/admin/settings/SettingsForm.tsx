@@ -32,10 +32,14 @@ export function SettingsForm({ initial }: { initial: AppSettings }) {
         <input
           type="email"
           name="adminEmail"
+          multiple
           defaultValue={initial.adminEmail}
-          placeholder="ban@email.com"
+          placeholder="ban@email.com, ban2@email.com"
           className={inputClass}
         />
+        <p className="mt-1.5 text-[11.5px] font-semibold text-ink/40">
+          Nhận nhiều email thì cách nhau bằng dấu phẩy.
+        </p>
       </div>
 
       <button
