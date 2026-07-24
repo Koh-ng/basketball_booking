@@ -110,7 +110,7 @@ export function EventAdminPanel({
         </form>
       )}
 
-      {event.status !== "cancelled" && (
+      {(event.status === "open" || event.status === "settled") && (
         <AttendanceEditor eventId={event.id} rows={data.rows} />
       )}
 
