@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { vnWeekday } from "@/lib/dates";
-import { sendAdminEmail } from "@/lib/email";
+import { sendAdminEmail, type SendEmailResult } from "@/lib/email";
 import {
   autoCancelEvent,
   deleteOldCancelledEvents,
@@ -23,6 +23,10 @@ import {
 import { getSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
+
+function emailStatus(result: SendEmailResult): string {
+  return result.ok ? "sent" : `skipped (${result.error})`;
+}
 
 /**
  * Cron chạy MỖI NGÀY lúc 01:00 UTC = 8:00 sáng VN (vercel.json).
@@ -64,7 +68,7 @@ export async function GET(req: NextRequest) {
     if (event && event.status === "open") {
       const data = await getEventVotes(event);
       const enough = data.headCount >= MIN_PLAYERS;
-      const sent = await sendAdminEmail(
+      const result = await sendAdminEmail(
         adminEmail,
         `🏀 Nhắc đặt sân — Chủ nhật ${event.eventDate} (${data.headCount} người)`,
         [
@@ -84,7 +88,7 @@ export async function GET(req: NextRequest) {
           participationSummaryMessage(data),
         ].join("\n"),
       );
-      actions.push(`court booking reminder email: ${sent ? "sent" : "skipped"}`);
+      actions.push(`court booking reminder email: ${emailStatus(result)}`);
     }
   }
 
@@ -93,7 +97,7 @@ export async function GET(req: NextRequest) {
     const event = await getUpcomingEvent();
     if (event && event.status === "open") {
       const data = await getEventVotes(event);
-      const sent = await sendAdminEmail(
+      const result = await sendAdminEmail(
         adminEmail,
         `🏀 Nhắc vote buổi bóng rổ Chủ nhật (đã có ${data.headCount} người)`,
         [
@@ -104,7 +108,7 @@ export async function GET(req: NextRequest) {
           voteReminderMessage(data),
         ].join("\n"),
       );
-      actions.push(`vote reminder email: ${sent ? "sent" : "skipped"}`);
+      actions.push(`vote reminder email: ${emailStatus(result)}`);
     }
   }
 
@@ -115,7 +119,7 @@ export async function GET(req: NextRequest) {
       const data = await getEventVotes(event);
       if (data.headCount < MIN_PLAYERS) {
         await autoCancelEvent(event, data.headCount);
-        const sent = await sendAdminEmail(
+        const result = await sendAdminEmail(
           adminEmail,
           `⚠️ Buổi Chủ nhật đã tự hủy (chỉ có ${data.headCount}/${MIN_PLAYERS} người)`,
           [
@@ -125,7 +129,7 @@ export async function GET(req: NextRequest) {
           ].join("\n"),
         );
         actions.push(
-          `auto-cancelled (${data.headCount}/${MIN_PLAYERS}), email: ${sent ? "sent" : "skipped"}`,
+          `auto-cancelled (${data.headCount}/${MIN_PLAYERS}), email: ${emailStatus(result)}`,
         );
       } else {
         actions.push(`headcount ok (${data.headCount}/${MIN_PLAYERS})`);
@@ -138,7 +142,7 @@ export async function GET(req: NextRequest) {
     const event = await getUpcomingEvent();
     if (event && event.status === "open") {
       const data = await getEventVotes(event);
-      const sent = await sendAdminEmail(
+      const result = await sendAdminEmail(
         adminEmail,
         `🏀 Hôm nay chơi bóng ${event.startTime} (${data.headCount} người đi)`,
         [
@@ -149,7 +153,7 @@ export async function GET(req: NextRequest) {
           gameDayMessage(data),
         ].join("\n"),
       );
-      actions.push(`game day email: ${sent ? "sent" : "skipped"}`);
+      actions.push(`game day email: ${emailStatus(result)}`);
     }
   }
 
@@ -212,12 +216,12 @@ export async function GET(req: NextRequest) {
     }
 
     if (sections.length > 0) {
-      const sent = await sendAdminEmail(
+      const result = await sendAdminEmail(
         adminEmail,
         `🏀 Đầu tuần: tiền sân + nhắc vote`,
         sections.join("\n\n==========\n\n"),
       );
-      actions.push(`monday summary email: ${sent ? "sent" : "skipped"}`);
+      actions.push(`monday summary email: ${emailStatus(result)}`);
     }
   }
 
@@ -232,7 +236,7 @@ export async function GET(req: NextRequest) {
           event.hostId,
           settings.defaultHostId,
         );
-        const sent = await sendAdminEmail(
+        const result = await sendAdminEmail(
           adminEmail,
           `💸 Còn ${unpaid.length} người chưa chuyển tiền sân`,
           [
@@ -243,7 +247,7 @@ export async function GET(req: NextRequest) {
             paymentReminderMessage(data, host),
           ].join("\n"),
         );
-        actions.push(`payment reminder email: ${sent ? "sent" : "skipped"}`);
+        actions.push(`payment reminder email: ${emailStatus(result)}`);
       }
     }
   }

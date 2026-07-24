@@ -376,16 +376,13 @@ export async function sendCourtBookingEmailAction(
     return { ok: false, error: "Chưa có email nhận — vào Cài đặt để thêm" };
   }
 
-  const sent = await sendAdminEmail(
+  const result = await sendAdminEmail(
     to,
     `🏀 Đặt sân buổi ${event.eventDate}`,
     courtBookingMessage(event),
   );
-  if (!sent) {
-    return {
-      ok: false,
-      error: "Gửi email thất bại — kiểm tra lại RESEND_API_KEY",
-    };
+  if (!result.ok) {
+    return { ok: false, error: `Gửi email thất bại: ${result.error}` };
   }
   return { ok: true };
 }
