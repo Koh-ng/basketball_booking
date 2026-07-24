@@ -16,6 +16,7 @@ import {
   settleEventAction,
   togglePaidAction,
   unsettleEventAction,
+  updateEventTimeAction,
   updateNoteAction,
 } from "./actions";
 
@@ -80,6 +81,32 @@ export function EventAdminPanel({
           {STATUS_LABEL[event.status]}
         </span>
       </div>
+
+      <form
+        action={updateEventTimeAction}
+        className="mb-3 flex items-center gap-2"
+      >
+        <input type="hidden" name="eventId" value={event.id} />
+        <label className="shrink-0 text-[12px] font-bold text-ink/55">
+          ⏰ Giờ chơi:
+        </label>
+        <input
+          type="time"
+          name="startTime"
+          defaultValue={event.startTime}
+          className="flex-1 rounded-[10px] border border-ink/15 px-2.5 py-2 text-[12.5px]"
+        />
+        <span className="text-ink/40">–</span>
+        <input
+          type="time"
+          name="endTime"
+          defaultValue={event.endTime}
+          className="flex-1 rounded-[10px] border border-ink/15 px-2.5 py-2 text-[12.5px]"
+        />
+        <button className="shrink-0 rounded-[10px] border border-ink/15 bg-white px-3 py-2 text-[12px] font-bold text-ink hover:bg-ink/3">
+          Lưu
+        </button>
+      </form>
 
       {hosts.length > 0 && (
         <form

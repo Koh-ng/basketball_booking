@@ -175,6 +175,24 @@ export async function updateNoteAction(formData: FormData) {
   revalidateAll(eventId);
 }
 
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** Đổi giờ chơi (giờ bắt đầu/kết thúc) của 1 buổi — kể cả buổi Chủ nhật tự động. */
+export async function updateEventTimeAction(formData: FormData) {
+  await requireAdmin();
+  const eventId = Number(formData.get("eventId"));
+  const startTime = String(formData.get("startTime") ?? "").trim();
+  const endTime = String(formData.get("endTime") ?? "").trim();
+  if (!eventId) return;
+  if (!TIME_RE.test(startTime) || !TIME_RE.test(endTime)) return;
+  if (startTime >= endTime) return;
+  await db
+    .update(events)
+    .set({ startTime, endTime })
+    .where(eq(events.id, eventId));
+  revalidateAll(eventId);
+}
+
 /** Admin tự tạo buổi mới cho một ngày bất kỳ (ngoài lịch Chủ nhật tự động). */
 export async function createEventAction(
   _prev: { ok: boolean; error?: string } | null,
@@ -184,7 +202,15 @@ export async function createEventAction(
   const eventDate = String(formData.get("eventDate") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
   const hostIdRaw = String(formData.get("hostId") ?? "");
+  const startTime = String(formData.get("startTime") ?? "").trim() || "10:00";
+  const endTime = String(formData.get("endTime") ?? "").trim() || "12:00";
   if (!eventDate) return { ok: false, error: "Chọn ngày cho buổi mới" };
+  if (!TIME_RE.test(startTime) || !TIME_RE.test(endTime)) {
+    return { ok: false, error: "Giờ không hợp lệ" };
+  }
+  if (startTime >= endTime) {
+    return { ok: false, error: "Giờ bắt đầu phải trước giờ kết thúc" };
+  }
 
   const existing = await db
     .select({ id: events.id })
@@ -199,6 +225,8 @@ export async function createEventAction(
     .insert(events)
     .values({
       eventDate,
+      startTime,
+      endTime,
       note: note || null,
       hostId: hostIdRaw ? Number(hostIdRaw) : null,
     })

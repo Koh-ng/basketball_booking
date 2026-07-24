@@ -42,6 +42,24 @@ export function CreateEventForm({
           {pending ? "Đang tạo..." : "Tạo buổi"}
         </button>
       </div>
+      <div className="flex items-center gap-2">
+        <label className="shrink-0 text-[12px] font-bold text-ink/55">
+          ⏰ Giờ chơi
+        </label>
+        <input
+          type="time"
+          name="startTime"
+          defaultValue="10:00"
+          className="flex-1 rounded-[10px] border border-ink/15 px-3 py-2.5 text-[13px]"
+        />
+        <span className="text-ink/40">–</span>
+        <input
+          type="time"
+          name="endTime"
+          defaultValue="12:00"
+          className="flex-1 rounded-[10px] border border-ink/15 px-3 py-2.5 text-[13px]"
+        />
+      </div>
       {hosts.length > 0 && (
         <select
           name="hostId"
