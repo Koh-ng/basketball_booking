@@ -121,7 +121,7 @@ export default async function StatsPage() {
                     ? `Lần cuối tham gia: ${formatDateVN(m.lastPlayed)}`
                     : "Chưa từng tham gia"}
                 </span>
-                {m.missedCount > 0 && (
+                {m.missedCount >= 2 && (
                   <span
                     className={`shrink-0 rounded-full px-2 py-[3px] text-[10.5px] font-bold ${
                       overThreshold
