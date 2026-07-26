@@ -5,6 +5,7 @@ export type PaymentRowClient = {
   amountLabel: string;
   paid: boolean;
   qrUrl: string | null;
+  bankDeepLinks: { label: string; href: string }[];
 };
 
 export function PaymentSection({
@@ -44,6 +45,24 @@ export function PaymentSection({
             alt="QR chuyển khoản"
             className="mx-auto block h-[180px] w-[180px] rounded-[14px] border border-ink/8"
           />
+          {me.bankDeepLinks.length > 0 && (
+            <div className="mt-3">
+              <p className="mb-1.5 text-[12px] font-semibold text-ink/45">
+                Hoặc bấm mở thẳng app ngân hàng (khỏi quét):
+              </p>
+              <div className="flex flex-wrap justify-center gap-1.5">
+                {me.bankDeepLinks.map((l) => (
+                  <a
+                    key={l.label}
+                    href={l.href}
+                    className="rounded-full border border-brand/30 bg-brand-soft px-3 py-1.5 text-[12px] font-bold text-brand-dark transition hover:brightness-95 active:scale-[0.96]"
+                  >
+                    {l.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
       {me && me.paid && (

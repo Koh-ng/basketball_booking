@@ -14,7 +14,7 @@ import { getCurrentMember } from "@/lib/memberAuth";
 import { formatVND, perPersonAmount } from "@/lib/money";
 import { getSettings } from "@/lib/settings";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
-import { vietQrUrl } from "@/lib/vietqr";
+import { BANK_APPS, vietQrDeepLink, vietQrUrl } from "@/lib/vietqr";
 
 export const dynamic = "force-dynamic";
 
@@ -52,20 +52,24 @@ export default async function EventDetailPage({
     bankLine = bank
       ? `CK: ${bank.bankCode} ${bank.accountNo} (${bank.accountName})`
       : null;
-    paymentRows = going.map((r) => ({
-      memberId: r.member.id,
-      name: r.member.name,
-      guests: r.guests,
-      amountLabel: formatVND(per * (1 + r.guests)),
-      paid: r.paid,
-      qrUrl: bank
-        ? vietQrUrl(
-            bank,
-            per * (1 + r.guests),
-            `BongRo ${event.eventDate} ${r.member.name}`,
-          )
-        : null,
-    }));
+    paymentRows = going.map((r) => {
+      const amount = per * (1 + r.guests);
+      const addInfo = `BongRo ${event.eventDate} ${r.member.name}`;
+      return {
+        memberId: r.member.id,
+        name: r.member.name,
+        guests: r.guests,
+        amountLabel: formatVND(amount),
+        paid: r.paid,
+        qrUrl: bank ? vietQrUrl(bank, amount, addInfo) : null,
+        bankDeepLinks: bank
+          ? BANK_APPS.map((app) => ({
+              label: app.label,
+              href: vietQrDeepLink(bank, app.id, amount, addInfo),
+            }))
+          : [],
+      };
+    });
   }
 
   return (
