@@ -10,7 +10,7 @@ const RULES = [
   "Đi lâu dài thì add Facebook, add group trên Messenger",
   "Báo trước nếu không đi thường xuyên hoặc nghỉ hẳn",
   "Nếu không đi thì nên cập nhật 1 ngày trước buổi chơi, nếu không thì vẫn sẽ tính và đóng tiền",
-  "Nếu kẹt không đi thường xuyên được (hơn 1 tháng off liên tục), tụi mình xin phép remove khỏi group trước — khi nào đi đều lại được thì add lại ngay, để nhóm luôn active và duy trì sân chơi kỷ luật cho anh em mỗi tuần",
+  "Nếu kẹt không đi thường xuyên được (vắng liên tục từ 4 buổi trở lên), tụi mình xin phép remove khỏi group trước — khi nào đi đều lại được thì add lại ngay, để nhóm luôn active và duy trì sân chơi kỷ luật cho anh em mỗi tuần",
 ];
 
 export default function RulesPage() {

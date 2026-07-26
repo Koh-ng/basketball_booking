@@ -62,13 +62,6 @@ export function addDays(isoDate: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Số ngày đã trôi qua từ 1 mốc ngày (YYYY-MM-DD) tới hôm nay (giờ VN). */
-export function daysSince(isoDate: string): number {
-  const from = new Date(`${isoDate}T00:00:00Z`).getTime();
-  const to = new Date(`${vnToday()}T00:00:00Z`).getTime();
-  return Math.round((to - from) / 86_400_000);
-}
-
 const WEEKDAY_VN = [
   "Chủ nhật",
   "Thứ hai",
