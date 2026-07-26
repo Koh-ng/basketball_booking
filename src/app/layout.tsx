@@ -106,6 +106,12 @@ export default async function RootLayout({
                 📍 {VENUE.name} — {VENUE.address}
               </a>
               <Link
+                href="/guide"
+                className="mt-1.5 block font-semibold text-ink/45 underline decoration-ink/20 underline-offset-2"
+              >
+                📖 Hướng dẫn sử dụng
+              </Link>
+              <Link
                 href="/feedback"
                 className="mt-1.5 block font-semibold text-ink/45 underline decoration-ink/20 underline-offset-2"
               >
