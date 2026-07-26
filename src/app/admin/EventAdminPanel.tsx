@@ -10,6 +10,7 @@ import {
 import { formatVND, perPersonAmount } from "@/lib/money";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 import { AttendanceEditor } from "./AttendanceEditor";
+import { CollapsibleSection } from "./CollapsibleSection";
 import {
   setEventHostAction,
   setEventStatusAction,
@@ -138,7 +139,9 @@ export function EventAdminPanel({
       )}
 
       {(event.status === "open" || event.status === "settled") && (
-        <AttendanceEditor eventId={event.id} rows={data.rows} />
+        <CollapsibleSection label="🧑‍🤝‍🧑 Quản lý thành viên">
+          <AttendanceEditor eventId={event.id} rows={data.rows} />
+        </CollapsibleSection>
       )}
 
       {event.status === "cancelled" && (
