@@ -21,11 +21,7 @@ export function AttendanceEditor({
     .map((r) => ({ id: r.member.id, name: r.member.name }));
 
   return (
-    <div className="mb-3 rounded-xl border border-ink/8 bg-ink/2 p-3">
-      <p className="mb-2 text-[12px] font-bold text-ink/55">
-        🧑‍🤝‍🧑 Người tham gia
-      </p>
-
+    <div className="rounded-xl border border-ink/8 bg-ink/2 p-3">
       {candidates.length > 0 && (
         <AddParticipantForm eventId={eventId} candidates={candidates} />
       )}
