@@ -27,13 +27,12 @@ export default async function StatsPage() {
   const finishedIds = new Set(finished.map((e) => e.id));
   const playedVotes = allVotes.filter((v) => finishedIds.has(v.eventId));
 
-  const perMember = new Map<number, { sessions: number; guests: number }>();
+  const perMember = new Map<number, { sessions: number }>();
   const lastPlayedByMember = new Map<number, string>();
   const eventById = new Map(finished.map((e) => [e.id, e]));
   for (const v of playedVotes) {
-    const entry = perMember.get(v.memberId) ?? { sessions: 0, guests: 0 };
+    const entry = perMember.get(v.memberId) ?? { sessions: 0 };
     entry.sessions += 1;
-    entry.guests += v.guests;
     perMember.set(v.memberId, entry);
 
     const ev = eventById.get(v.eventId);
@@ -47,7 +46,7 @@ export default async function StatsPage() {
   const leaderboard = allMembers
     .filter((m) => m.active)
     .map((m) => {
-      const entry = perMember.get(m.id) ?? { sessions: 0, guests: 0 };
+      const entry = perMember.get(m.id) ?? { sessions: 0 };
       const joinedDate = toVnDateString(m.createdAt);
       // Chỉ tính các buổi từ lúc thành viên tham gia nhóm trở đi.
       const eligible = finished.filter((e) => e.eventDate >= joinedDate);
@@ -59,7 +58,6 @@ export default async function StatsPage() {
         id: m.id,
         name: m.name,
         sessions: entry.sessions,
-        guests: entry.guests,
         lastPlayed,
         missedCount: missed.length,
       };
@@ -104,12 +102,6 @@ export default async function StatsPage() {
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13.5px] font-semibold text-ink">
                   {medals[i] ?? `${i + 1}.`} {m.name}
-                  {m.guests > 0 && (
-                    <span className="font-medium text-ink/45">
-                      {" "}
-                      · dẫn {m.guests} khách
-                    </span>
-                  )}
                 </span>
                 <span className="shrink-0 text-[13px] font-bold text-ink/60">
                   {m.sessions} buổi
