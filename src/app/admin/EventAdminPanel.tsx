@@ -1,3 +1,4 @@
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { CopyButton } from "@/components/CopyButton";
 import type { EventWithVotes } from "@/lib/events";
 import type { HostProfile } from "@/lib/hostProfiles";
@@ -10,7 +11,6 @@ import {
 import { formatVND, perPersonAmount } from "@/lib/money";
 import { STATUS_BADGE, STATUS_LABEL } from "@/lib/status";
 import { AttendanceEditor } from "./AttendanceEditor";
-import { CollapsibleSection } from "./CollapsibleSection";
 import {
   setEventHostAction,
   setEventStatusAction,
