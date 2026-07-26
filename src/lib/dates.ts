@@ -1,8 +1,13 @@
 const TZ = "Asia/Ho_Chi_Minh";
 
+/** Date -> "YYYY-MM-DD" theo giờ VN. */
+export function toVnDateString(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(date);
+}
+
 /** Trả về ngày hiện tại theo giờ VN dạng YYYY-MM-DD */
 export function vnToday(): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
+  return toVnDateString(new Date());
 }
 
 /** Giờ hiện tại theo giờ VN dạng "HH:mm" (24h), so sánh được với start/end time. */
@@ -55,6 +60,13 @@ export function addDays(isoDate: string, days: number): string {
   const d = new Date(`${isoDate}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
+}
+
+/** Số ngày đã trôi qua từ 1 mốc ngày (YYYY-MM-DD) tới hôm nay (giờ VN). */
+export function daysSince(isoDate: string): number {
+  const from = new Date(`${isoDate}T00:00:00Z`).getTime();
+  const to = new Date(`${vnToday()}T00:00:00Z`).getTime();
+  return Math.round((to - from) / 86_400_000);
 }
 
 const WEEKDAY_VN = [
