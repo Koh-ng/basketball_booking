@@ -41,28 +41,34 @@ export default async function RootLayout({
               >
                 🏀
               </Link>
-              <nav className="flex shrink-0 gap-3">
+              <nav className="flex shrink-0 gap-2">
+                <Link
+                  href="/guide"
+                  className="whitespace-nowrap text-[12px] font-bold text-white/92 transition hover:text-white active:opacity-60"
+                >
+                  Hướng dẫn
+                </Link>
                 <Link
                   href="/rules"
-                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
+                  className="whitespace-nowrap text-[12px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Luật
                 </Link>
                 <Link
                   href="/history"
-                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
+                  className="whitespace-nowrap text-[12px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Lịch sử
                 </Link>
                 <Link
                   href="/stats"
-                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
+                  className="whitespace-nowrap text-[12px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Thống kê
                 </Link>
                 <Link
                   href="/admin"
-                  className="whitespace-nowrap text-[13px] font-bold text-white/92 transition hover:text-white active:opacity-60"
+                  className="whitespace-nowrap text-[12px] font-bold text-white/92 transition hover:text-white active:opacity-60"
                 >
                   Quản lý
                 </Link>
@@ -105,12 +111,6 @@ export default async function RootLayout({
               >
                 📍 {VENUE.name} — {VENUE.address}
               </a>
-              <Link
-                href="/guide"
-                className="mt-1.5 block font-semibold text-ink/45 underline decoration-ink/20 underline-offset-2"
-              >
-                📖 Hướng dẫn sử dụng
-              </Link>
               <Link
                 href="/feedback"
                 className="mt-1.5 block font-semibold text-ink/45 underline decoration-ink/20 underline-offset-2"
