@@ -66,6 +66,8 @@ export default async function EventDetailPage({
           ? BANK_APPS.map((app) => ({
               label: app.label,
               href: vietQrDeepLink(bank, app.id, amount, addInfo),
+              logo: app.logo,
+              color: app.color,
             }))
           : [],
       };
