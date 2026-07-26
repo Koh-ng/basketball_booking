@@ -26,7 +26,7 @@ export function vietQrUrl(
  * tiền/nội dung ở một số ngân hàng, tuỳ mức hỗ trợ hiện tại của VietQR).
  * Logo lấy từ CDN chính thức của VietQR (api.vietqr.io/img/{code}.png).
  */
-export type BankAppId = "mb" | "vcb" | "tcb" | "acb" | "vib" | "vpb";
+export type BankAppId = "mb" | "vcb" | "tcb" | "acb" | "vib" | "vpb" | "tpb";
 
 export const BANK_APPS: {
   id: BankAppId;
@@ -69,6 +69,12 @@ export const BANK_APPS: {
     label: "VPBank",
     logo: "https://api.vietqr.io/img/VPB.png",
     color: "#00A651",
+  },
+  {
+    id: "tpb",
+    label: "TPBank",
+    logo: "https://api.vietqr.io/img/TPB.png",
+    color: "#862374",
   },
 ];
 
