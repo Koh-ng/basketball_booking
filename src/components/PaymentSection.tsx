@@ -48,13 +48,15 @@ export function PaymentSection({
           {me.bankDeepLinks.length > 0 && (
             <div className="mt-3">
               <p className="mb-1.5 text-[12px] font-semibold text-ink/45">
-                Hoặc bấm mở thẳng app ngân hàng (khỏi quét):
+                Hoặc bấm để mở app ngân hàng:
               </p>
               <div className="flex flex-wrap justify-center gap-1.5">
                 {me.bankDeepLinks.map((l) => (
                   <a
                     key={l.label}
                     href={l.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="rounded-full border border-brand/30 bg-brand-soft px-3 py-1.5 text-[12px] font-bold text-brand-dark transition hover:brightness-95 active:scale-[0.96]"
                   >
                     {l.label}
