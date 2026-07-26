@@ -22,18 +22,54 @@ export function vietQrUrl(
 
 /**
  * Mã app trong deep link VietQR (dl.vietqr.io) — chỉ những app đã xác nhận
- * được mã chính xác. Bấm link sẽ mở thẳng app đó, điền sẵn thông tin chuyển
- * khoản (tuỳ app có hỗ trợ tự điền hay chưa), không cần quét QR.
+ * được mã chính xác. Bấm link sẽ mở thẳng app đó (chưa tự điền được số
+ * tiền/nội dung ở một số ngân hàng, tuỳ mức hỗ trợ hiện tại của VietQR).
+ * Logo lấy từ CDN chính thức của VietQR (api.vietqr.io/img/{code}.png).
  */
 export type BankAppId = "mb" | "vcb" | "tcb" | "acb" | "vib" | "vpb";
 
-export const BANK_APPS: { id: BankAppId; label: string }[] = [
-  { id: "mb", label: "MB Bank" },
-  { id: "vcb", label: "Vietcombank" },
-  { id: "tcb", label: "Techcombank" },
-  { id: "acb", label: "ACB" },
-  { id: "vib", label: "VIB" },
-  { id: "vpb", label: "VPBank" },
+export const BANK_APPS: {
+  id: BankAppId;
+  label: string;
+  logo: string;
+  color: string;
+}[] = [
+  {
+    id: "mb",
+    label: "MB Bank",
+    logo: "https://api.vietqr.io/img/MB.png",
+    color: "#9F224E",
+  },
+  {
+    id: "vcb",
+    label: "Vietcombank",
+    logo: "https://api.vietqr.io/img/VCB.png",
+    color: "#00743E",
+  },
+  {
+    id: "tcb",
+    label: "Techcombank",
+    logo: "https://api.vietqr.io/img/TCB.png",
+    color: "#E30613",
+  },
+  {
+    id: "acb",
+    label: "ACB",
+    logo: "https://api.vietqr.io/img/ACB.png",
+    color: "#0033A0",
+  },
+  {
+    id: "vib",
+    label: "VIB",
+    logo: "https://api.vietqr.io/img/VIB.png",
+    color: "#F7941E",
+  },
+  {
+    id: "vpb",
+    label: "VPBank",
+    logo: "https://api.vietqr.io/img/VPB.png",
+    color: "#00A651",
+  },
 ];
 
 /** Deep link mở thẳng 1 app ngân hàng cụ thể để chuyển khoản — xem BANK_APPS. */

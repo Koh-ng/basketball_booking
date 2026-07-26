@@ -5,7 +5,7 @@ export type PaymentRowClient = {
   amountLabel: string;
   paid: boolean;
   qrUrl: string | null;
-  bankDeepLinks: { label: string; href: string }[];
+  bankDeepLinks: { label: string; href: string; logo: string; color: string }[];
 };
 
 export function PaymentSection({
@@ -48,7 +48,7 @@ export function PaymentSection({
           {me.bankDeepLinks.length > 0 && (
             <div className="mt-3">
               <p className="mb-1.5 text-[12px] font-semibold text-ink/45">
-                Hoặc bấm để mở app ngân hàng:
+                Bấm để mở app ngân hàng:
               </p>
               <div className="flex flex-wrap justify-center gap-1.5">
                 {me.bankDeepLinks.map((l) => (
@@ -57,8 +57,15 @@ export function PaymentSection({
                     href={l.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-full border border-brand/30 bg-brand-soft px-3 py-1.5 text-[12px] font-bold text-brand-dark transition hover:brightness-95 active:scale-[0.96]"
+                    style={{ borderColor: `${l.color}55`, color: l.color }}
+                    className="flex items-center gap-1.5 rounded-full border-[1.5px] bg-white px-3 py-1.5 text-[12px] font-bold transition hover:brightness-95 active:scale-[0.96]"
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={l.logo}
+                      alt=""
+                      className="h-4 w-4 shrink-0 rounded-full border border-ink/6 object-contain"
+                    />
                     {l.label}
                   </a>
                 ))}
