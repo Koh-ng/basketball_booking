@@ -70,6 +70,8 @@ export const votes = pgTable(
     guests: integer("guests").notNull().default(0),
     // Tên khách đi kèm (không bắt buộc), VD "Tuấn, Minh"
     guestNames: text("guest_names"),
+    transferred: boolean("transferred").notNull().default(false),
+    transferredAt: timestamp("transferred_at", { withTimezone: true }),
     paid: boolean("paid").notNull().default(false),
     paidAt: timestamp("paid_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true })

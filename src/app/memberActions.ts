@@ -12,6 +12,7 @@ import {
   setMemberPin,
   verifyMemberPin,
 } from "@/lib/memberAuth";
+import { getEventById, markTransferred } from "@/lib/events";
 
 export async function memberLoginAction(
   _prev: { error: string } | null,
@@ -62,4 +63,23 @@ export async function changeMemberPinAction(
   await setMemberPin(member.id, newPin);
   revalidatePath("/account");
   return { ok: true };
+}
+
+export async function markTransferredAction(formData: FormData) {
+  const member = await getCurrentMember();
+  if (!member) redirect("/login");
+
+  const eventId = Number(formData.get("eventId"));
+  const event = eventId ? await getEventById(eventId) : null;
+  if (
+    !event ||
+    (event.status !== "settled" && event.status !== "completed") ||
+    event.totalCost == null
+  ) {
+    return;
+  }
+
+  await markTransferred(event.id, member.id);
+  revalidatePath(`/events/${event.id}`);
+  revalidatePath(`/admin/events/${event.id}`);
 }

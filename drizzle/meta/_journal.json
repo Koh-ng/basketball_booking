@@ -50,6 +50,13 @@
       "when": 1784553836303,
       "tag": "0006_flowery_roughhouse",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785151392457,
+      "tag": "0007_last_emma_frost",
+      "breakpoints": true
     }
   ]
 }
