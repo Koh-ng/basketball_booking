@@ -107,8 +107,11 @@ export function paymentStatusMessage(data: EventWithVotes): string {
   const per = perPersonAmount(total, headCount);
   const going = rows.filter((r) => r.going === true);
   const paid = going.filter((r) => r.paid).map((r) => r.member.name);
+  const transferred = going
+    .filter((r) => r.transferred && !r.paid)
+    .map((r) => r.member.name);
   const unpaid = going
-    .filter((r) => !r.paid)
+    .filter((r) => !r.transferred && !r.paid)
     .map((r) => `${r.member.name} (${formatVND(per * (1 + r.guests))})`);
   const lines = [
     `💸 TIỀN SÂN ${formatDateVN(event.eventDate)} — đã thu ${paid.length}/${going.length} người`,
@@ -120,7 +123,12 @@ export function paymentStatusMessage(data: EventWithVotes): string {
     lines.push(`✅ Tất cả đã chuyển khoản, xong xuôi!`);
   }
   if (paid.length > 0) {
-    lines.push(`✔️ Đã chuyển (${paid.length}): ${paid.join(", ")}`);
+    lines.push(`✅ Đã nhận (${paid.length}): ${paid.join(", ")}`);
+  }
+  if (transferred.length > 0) {
+    lines.push(
+      `✔️ Đã chuyển, chờ xác nhận (${transferred.length}): ${transferred.join(", ")}`,
+    );
   }
   return lines.join("\n");
 }
@@ -134,7 +142,7 @@ export function paymentReminderMessage(
   const total = event.totalCost ?? 0;
   const per = perPersonAmount(total, headCount);
   const unpaid = rows
-    .filter((r) => r.going === true && !r.paid)
+    .filter((r) => r.going === true && !r.transferred && !r.paid)
     .map((r) =>
       r.guests > 0
         ? `${r.member.name} (+${r.guests}: ${formatVND(per * (1 + r.guests))})`

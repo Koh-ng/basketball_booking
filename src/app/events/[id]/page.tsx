@@ -60,6 +60,7 @@ export default async function EventDetailPage({
         name: r.member.name,
         guests: r.guests,
         amountLabel: formatVND(amount),
+        transferred: r.transferred,
         paid: r.paid,
         qrUrl: bank ? vietQrUrl(bank, amount, addInfo) : null,
         bankDeepLinks: bank
@@ -140,6 +141,7 @@ export default async function EventDetailPage({
             totalLabel={formatVND(event.totalCost ?? 0)}
             perPersonLabel={formatVND(per)}
             bankLine={bankLine}
+            eventId={event.id}
           />
         </div>
       )}
@@ -194,7 +196,11 @@ export default async function EventDetailPage({
                 event.totalCost != null &&
                 (r.paid ? (
                   <span className="rounded-full bg-success-bg px-2.5 py-1 text-[11px] font-bold text-success">
-                    Đã chuyển ✓
+                    Đã nhận ✓
+                  </span>
+                ) : r.transferred ? (
+                  <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-700">
+                    Đã chuyển
                   </span>
                 ) : (
                   <span className="rounded-full bg-amber-bg px-2.5 py-1 text-[11px] font-bold text-amber">

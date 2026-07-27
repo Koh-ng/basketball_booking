@@ -119,10 +119,11 @@ export default function GuidePage() {
             đó ngay — lưu ý vẫn cần tự kiểm tra lại số tiền/nội dung trước
             khi xác nhận chuyển.
           </Step>
-          <Step n={4} title="Admin xác nhận đã nhận tiền">
-            Khi admin thấy tiền về, sẽ tick trạng thái{" "}
-            <b className="text-success">Đã chuyển ✓</b> cho bạn trong danh
-            sách — vậy là xong, không cần báo lại.
+          <Step n={4} title="Xác nhận chuyển khoản">
+            Chuyển xong, bạn bấm <b>Đã chuyển</b>; admin kiểm tra và chuyển
+            trạng thái thành
+            <b className="text-success"> Đã nhận ✓</b> trong danh sách — vậy
+            là xong, không cần báo lại.
           </Step>
         </div>
       </CollapsibleSection>

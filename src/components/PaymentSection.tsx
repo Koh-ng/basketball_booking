@@ -1,8 +1,11 @@
+import { markTransferredAction } from "@/app/memberActions";
+
 export type PaymentRowClient = {
   memberId: number;
   name: string;
   guests: number;
   amountLabel: string;
+  transferred: boolean;
   paid: boolean;
   qrUrl: string | null;
   bankDeepLinks: { label: string; href: string; logo: string; color: string }[];
@@ -14,12 +17,14 @@ export function PaymentSection({
   perPersonLabel,
   totalLabel,
   bankLine,
+  eventId,
 }: {
   rows: PaymentRowClient[];
   me: PaymentRowClient | null;
   perPersonLabel: string;
   totalLabel: string;
   bankLine: string | null;
+  eventId: number;
 }) {
   return (
     <div className="rounded-2xl border border-ink/8 bg-white p-4">
@@ -33,7 +38,7 @@ export function PaymentSection({
         </p>
       )}
 
-      {me && !me.paid && me.qrUrl && (
+      {me && !me.transferred && !me.paid && me.qrUrl && (
         <div className="mt-3.5 text-center">
           <p className="mb-2 text-[13px] font-bold text-ink">
             {me.name} ơi, quét QR để chuyển {me.amountLabel}
@@ -74,10 +79,24 @@ export function PaymentSection({
           )}
         </div>
       )}
+      {me && me.transferred && !me.paid && (
+        <p className="mt-3 text-[13px] font-bold text-sky-700">
+          ⏳ {me.name} đã báo chuyển khoản, đang chờ admin xác nhận.
+        </p>
+      )}
       {me && me.paid && (
         <p className="mt-3 text-[13px] font-bold text-success">
-          ✅ {me.name} đã chuyển khoản, cảm ơn bạn!
+          ✅ Admin đã xác nhận nhận được khoản chuyển của {me.name}.
         </p>
+      )}
+
+      {me && !me.transferred && !me.paid && (
+        <form action={markTransferredAction} className="mt-3 text-center">
+          <input type="hidden" name="eventId" value={eventId} />
+          <button className="rounded-xl bg-ink px-4 py-2.5 text-[13px] font-bold text-white transition active:scale-[0.97]">
+            Đã chuyển
+          </button>
+        </form>
       )}
 
       <div className="mt-3.5 flex flex-col">
@@ -97,7 +116,11 @@ export function PaymentSection({
             </span>
             {r.paid ? (
               <span className="rounded-full bg-success-bg px-2.5 py-1 text-[11px] font-bold text-success">
-                Đã chuyển ✓
+                Đã nhận ✓
+              </span>
+            ) : r.transferred ? (
+              <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-700">
+                Đã chuyển
               </span>
             ) : (
               <span className="rounded-full bg-amber-bg px-2.5 py-1 text-[11px] font-bold text-amber">

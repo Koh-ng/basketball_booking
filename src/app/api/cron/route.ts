@@ -230,7 +230,9 @@ export async function GET(req: NextRequest) {
     const event = await getLatestPastEvent();
     if (event && event.status === "settled") {
       const data = await getEventVotes(event);
-      const unpaid = data.rows.filter((r) => r.going === true && !r.paid);
+      const unpaid = data.rows.filter(
+        (r) => r.going === true && !r.transferred && !r.paid,
+      );
       if (unpaid.length > 0) {
         const host = await getEffectiveHost(
           event.hostId,

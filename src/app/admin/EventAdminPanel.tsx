@@ -243,30 +243,28 @@ export function EventAdminPanel({
                       </span>
                     )}
                   </span>
-                  <form action={togglePaidAction}>
-                    <input type="hidden" name="eventId" value={event.id} />
-                    <input
-                      type="hidden"
-                      name="memberId"
-                      value={r.member.id}
-                    />
-                    <input
-                      type="hidden"
-                      name="paid"
-                      value={r.paid ? "false" : "true"}
-                    />
-                    <button
-                      className={`rounded-full border px-[11px] py-[5px] text-[11px] font-bold transition-all duration-150 active:scale-[0.94] ${
-                        r.paid
-                          ? "border-success-border bg-success-bg text-success hover:border-success/60 hover:bg-success-bg/70"
-                          : "border-amber-border bg-amber-bg text-amber hover:border-amber/60 hover:bg-amber-bg/70"
-                      }`}
-                    >
-                      {r.paid
-                        ? "Đã chuyển ✓ (bấm để bỏ)"
-                        : "Chưa chuyển (bấm khi đã nhận)"}
-                    </button>
-                  </form>
+                  {r.transferred && !r.paid ? (
+                    <form action={togglePaidAction}>
+                      <input type="hidden" name="eventId" value={event.id} />
+                      <input
+                        type="hidden"
+                        name="memberId"
+                        value={r.member.id}
+                      />
+                      <input type="hidden" name="paid" value="true" />
+                      <button className="rounded-full border border-sky-200 bg-sky-50 px-[11px] py-[5px] text-[11px] font-bold text-sky-700 transition-all duration-150 hover:border-sky-400 active:scale-[0.94]">
+                        Đã nhận
+                      </button>
+                    </form>
+                  ) : (
+                    <span className={`rounded-full px-[11px] py-[5px] text-[11px] font-bold ${
+                      r.paid
+                        ? "bg-success-bg text-success"
+                        : "bg-amber-bg text-amber"
+                    }`}>
+                      {r.paid ? "Đã nhận ✓" : "Chưa chuyển"}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

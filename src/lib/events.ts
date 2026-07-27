@@ -18,6 +18,7 @@ export type VoteRow = {
   going: boolean | null; // null = chưa vote
   guests: number; // số khách đi kèm
   guestNames: string | null; // tên khách (không bắt buộc)
+  transferred: boolean;
   paid: boolean;
 };
 
@@ -115,6 +116,7 @@ export async function getEventVotes(event: Event): Promise<EventWithVotes> {
         going: v ? v.going : null,
         guests: v?.going ? v.guests : 0,
         guestNames: v?.going ? v.guestNames : null,
+        transferred: v?.transferred ?? false,
         paid: v?.paid ?? false,
       };
     });
@@ -197,8 +199,27 @@ export async function getOutstandingDebts(): Promise<MemberDebt[]> {
 export async function setPaid(eventId: number, memberId: number, paid: boolean) {
   await db
     .update(votes)
-    .set({ paid, paidAt: paid ? new Date() : null })
+    .set({
+      transferred: paid ? true : undefined,
+      paid,
+      paidAt: paid ? new Date() : null,
+    })
     .where(and(eq(votes.eventId, eventId), eq(votes.memberId, memberId)));
+}
+
+/** Thành viên tự xác nhận đã chuyển khoản; chỉ admin mới xác nhận đã nhận. */
+export async function markTransferred(eventId: number, memberId: number) {
+  await db
+    .update(votes)
+    .set({ transferred: true, transferredAt: new Date() })
+    .where(
+      and(
+        eq(votes.eventId, eventId),
+        eq(votes.memberId, memberId),
+        eq(votes.going, true),
+        eq(votes.paid, false),
+      ),
+    );
 }
 
 export async function listEvents(): Promise<Event[]> {
