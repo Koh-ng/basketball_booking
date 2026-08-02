@@ -82,7 +82,7 @@ nhận, hoặc lỗi trả về từ Gmail.
 2. Thành viên vào chọn tên → bấm **Đi** — bạn theo dõi số người để book sân
 3. Sau buổi chơi, vào **Quản lý** → nhập tổng chi phí → **Chốt chia tiền**
 4. Thành viên mở app thấy số tiền + QR VietQR đúng số tiền của mình
-5. Thành viên chuyển khoản xong tự bấm **Đã chuyển**; admin kiểm tra tài khoản rồi bấm **Đã nhận** — còn thiếu ai, bấm **Copy tin nhắc chuyển khoản** dán vào group
+5. Thành viên chuyển khoản xong tự bấm **Đã chuyển**; admin kiểm tra tài khoản rồi bấm **Đã nhận** (bấm được kể cả khi thành viên chưa báo **Đã chuyển**, bấm lại để bỏ) — còn thiếu ai, bấm **Copy tin nhắc chuyển khoản** dán vào group
 
 ## Cài đặt trong app
 

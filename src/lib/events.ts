@@ -196,14 +196,16 @@ export async function getOutstandingDebts(): Promise<MemberDebt[]> {
   return [...byMember.values()].sort((a, b) => b.total - a.total);
 }
 
+/**
+ * Admin xác nhận đã nhận tiền (hoặc bỏ xác nhận). Không đụng vào `transferred`
+ * — đó là cờ riêng của thành viên — nên admin tick "Đã nhận" được kể cả khi
+ * thành viên chưa bấm "Đã chuyển", và bỏ tick thì trạng thái quay lại đúng
+ * những gì thành viên đã tự báo.
+ */
 export async function setPaid(eventId: number, memberId: number, paid: boolean) {
   await db
     .update(votes)
-    .set({
-      transferred: paid ? true : undefined,
-      paid,
-      paidAt: paid ? new Date() : null,
-    })
+    .set({ paid, paidAt: paid ? new Date() : null })
     .where(and(eq(votes.eventId, eventId), eq(votes.memberId, memberId)));
 }
 
