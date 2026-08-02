@@ -123,7 +123,9 @@ export default function GuidePage() {
             Chuyển xong, bạn bấm <b>Đã chuyển</b>; admin kiểm tra và chuyển
             trạng thái thành
             <b className="text-success"> Đã nhận ✓</b> trong danh sách — vậy
-            là xong, không cần báo lại.
+            là xong, không cần báo lại. Nếu bạn quên bấm <b>Đã chuyển</b>,
+            admin vẫn xác nhận <b className="text-success">Đã nhận ✓</b> được
+            khi thấy tiền về.
           </Step>
         </div>
       </CollapsibleSection>

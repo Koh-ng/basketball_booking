@@ -243,28 +243,39 @@ export function EventAdminPanel({
                       </span>
                     )}
                   </span>
-                  {r.transferred && !r.paid ? (
-                    <form action={togglePaidAction}>
-                      <input type="hidden" name="eventId" value={event.id} />
-                      <input
-                        type="hidden"
-                        name="memberId"
-                        value={r.member.id}
-                      />
-                      <input type="hidden" name="paid" value="true" />
-                      <button className="rounded-full border border-sky-200 bg-sky-50 px-[11px] py-[5px] text-[11px] font-bold text-sky-700 transition-all duration-150 hover:border-sky-400 active:scale-[0.94]">
-                        Đã nhận
-                      </button>
-                    </form>
-                  ) : (
-                    <span className={`rounded-full px-[11px] py-[5px] text-[11px] font-bold ${
-                      r.paid
-                        ? "bg-success-bg text-success"
-                        : "bg-amber-bg text-amber"
-                    }`}>
-                      {r.paid ? "Đã nhận ✓" : "Chưa chuyển"}
-                    </span>
-                  )}
+                  {/*
+                    Admin luôn tự xác nhận được "Đã nhận", kể cả khi thành
+                    viên chưa bấm "Đã chuyển" — nhãn chỉ cho biết thành viên
+                    đã tự báo chuyển hay chưa.
+                  */}
+                  <form action={togglePaidAction}>
+                    <input type="hidden" name="eventId" value={event.id} />
+                    <input
+                      type="hidden"
+                      name="memberId"
+                      value={r.member.id}
+                    />
+                    <input
+                      type="hidden"
+                      name="paid"
+                      value={r.paid ? "false" : "true"}
+                    />
+                    <button
+                      className={`rounded-full border px-[11px] py-[5px] text-[11px] font-bold transition-all duration-150 active:scale-[0.94] ${
+                        r.paid
+                          ? "border-success-border bg-success-bg text-success hover:border-success/60 hover:bg-success-bg/70"
+                          : r.transferred
+                            ? "border-sky-200 bg-sky-50 text-sky-700 hover:border-sky-400"
+                            : "border-amber-border bg-amber-bg text-amber hover:border-amber/60 hover:bg-amber-bg/70"
+                      }`}
+                    >
+                      {r.paid
+                        ? "Đã nhận ✓ (bấm để bỏ)"
+                        : r.transferred
+                          ? "Đã chuyển · bấm Đã nhận"
+                          : "Chưa chuyển · bấm Đã nhận"}
+                    </button>
+                  </form>
                 </div>
               ))}
             </div>
