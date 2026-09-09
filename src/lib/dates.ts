@@ -56,6 +56,24 @@ export function remainingSundaysOfMonth(): string[] {
   return sundays;
 }
 
+/** Giờ khoá vote: 12h trưa hôm trước buổi chơi (thứ 7, vì buổi là Chủ nhật). */
+export const VOTE_LOCK_TIME = "12:00";
+
+/** Ngày khoá vote của một buổi (YYYY-MM-DD) — luôn là hôm trước buổi chơi. */
+export function voteLockDate(eventDate: string): string {
+  return addDays(eventDate, -1);
+}
+
+/**
+ * Đã quá hạn vote chưa, theo giờ VN: từ 12h trưa hôm trước buổi chơi trở đi.
+ */
+export function isPastVoteDeadline(eventDate: string): boolean {
+  const lockDate = voteLockDate(eventDate);
+  const today = vnToday();
+  if (today > lockDate) return true;
+  return today === lockDate && vnTimeHM() >= VOTE_LOCK_TIME;
+}
+
 export function addDays(isoDate: string, days: number): string {
   const d = new Date(`${isoDate}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
@@ -103,4 +121,10 @@ export function formatDateTimeVN(date: Date): string {
     minute: "2-digit",
     hourCycle: "h23",
   }).format(date);
+}
+
+/** "12h trưa Thứ bảy 18/07/2026" — hạn chốt vote hiển thị cho thành viên. */
+export function voteDeadlineLabel(eventDate: string): string {
+  const hour = VOTE_LOCK_TIME.replace(":00", "h");
+  return `${hour} trưa ${formatDateVN(voteLockDate(eventDate))}`;
 }

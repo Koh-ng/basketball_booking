@@ -1,6 +1,6 @@
 import type { Event } from "@/db/schema";
 import type { EventWithVotes } from "./events";
-import { formatDateVN } from "./dates";
+import { formatDateVN, voteDeadlineLabel } from "./dates";
 import type { HostProfile } from "./hostProfiles";
 import { formatVND, perPersonAmount } from "./money";
 import { VENUE } from "./venue";
@@ -46,6 +46,7 @@ export function voteReminderMessage(data: EventWithVotes): string {
     `📍 ${VENUE.name}: ${VENUE.mapsUrl}`,
     ``,
     `Anh em vào vote để chốt sân nhé: ${appUrl()}`,
+    `🔒 Vote khoá lúc ${voteDeadlineLabel(event.eventDate)} — sau đó vote đi mà không đi thì vẫn tính tiền.`,
     ``,
     `✅ Đã chốt đi (${headCount}): ${going.join(", ") || "chưa có ai"}`,
   ];

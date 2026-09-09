@@ -61,7 +61,10 @@ export default function GuidePage() {
             Vào trang chủ, thấy buổi sắp tới hiện ngay trên cùng. Bấm{" "}
             <b className="text-success">✅ Đi</b> nếu tham gia, hoặc{" "}
             <b className="text-ink/60">❌ Không đi</b> nếu không. Có thể đổi
-            vote bất cứ lúc nào trước giờ chơi.
+            vote thoải mái cho tới khi khoá vote lúc{" "}
+            <b className="text-ink">12h trưa thứ 7</b> (trước buổi chơi 1
+            ngày) — sau mốc đó vote đi mà không đi thì vẫn tính tiền, nếu
+            tham gia được thì nhắn lên group nhé.
           </Step>
           <Step n={3} title="Theo dõi danh sách đi/không đi">
             Ngay dưới phần vote là danh sách ai đã{" "}

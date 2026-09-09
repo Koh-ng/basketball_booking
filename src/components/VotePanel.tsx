@@ -22,10 +22,16 @@ export function VotePanel({
   eventId,
   me,
   locked,
+  lockedMessage,
+  deadlineLabel,
 }: {
   eventId: number;
   me: MyVote;
   locked: boolean;
+  /** Lý do khoá vote, hiện cho thành viên khi `locked`. */
+  lockedMessage?: string | null;
+  /** Hạn chốt vote, VD "12h trưa Thứ bảy 18/07" — hiện khi vote còn mở. */
+  deadlineLabel?: string | null;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -165,14 +171,21 @@ export function VotePanel({
       )}
 
       {locked && (
-        <p className="mt-3 text-[12.5px] font-semibold text-ink/50">
-          Buổi này đã chốt, không vote được nữa.
+        <p className="mt-3 rounded-xl bg-ink/4 px-3 py-2.5 text-[12.5px] leading-relaxed font-semibold text-ink/55">
+          🔒 {lockedMessage ?? "Buổi này đã chốt, không vote được nữa."}
         </p>
       )}
 
-      {optimistic.going !== null && !locked && (
+      {!locked && deadlineLabel && (
+        <p className="mt-3 text-[12px] font-semibold text-ink/45">
+          ⏳ Vote khoá lúc {deadlineLabel}. Vote đi mà không đi thì vẫn tính
+          tiền như thường nhé.
+        </p>
+      )}
+
+      {optimistic.going !== null && (
         <p className="mt-2 text-[12.5px] font-semibold text-ink/50">
-          Vote hiện tại của bạn:{" "}
+          Vote {locked ? "" : "hiện tại "}của bạn:{" "}
           <b className="text-ink">
             {optimistic.going
               ? `Đi ✅${
@@ -182,11 +195,12 @@ export function VotePanel({
                 }`
               : "Không đi ❌"}
           </b>{" "}
-          {pending ? (
-            <span className="text-ink/40">· đang lưu…</span>
-          ) : (
-            <span>(bấm nút để đổi)</span>
-          )}
+          {!locked &&
+            (pending ? (
+              <span className="text-ink/40">· đang lưu…</span>
+            ) : (
+              <span>(bấm nút để đổi)</span>
+            ))}
         </p>
       )}
 

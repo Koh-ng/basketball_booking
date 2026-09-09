@@ -1,7 +1,11 @@
 import { LoginPrompt } from "@/components/LoginPrompt";
 import { VotePanel } from "@/components/VotePanel";
 import Link from "next/link";
-import { formatDateShort, formatDateVN } from "@/lib/dates";
+import {
+  formatDateShort,
+  formatDateVN,
+  voteDeadlineLabel,
+} from "@/lib/dates";
 import { googleCalendarUrl } from "@/lib/calendar";
 import {
   ensureMonthEvents,
@@ -9,6 +13,7 @@ import {
   getFutureEvents,
   getLatestPastEvent,
   getUpcomingEvent,
+  voteLockState,
   type EventWithVotes,
 } from "@/lib/events";
 import { getCurrentMember } from "@/lib/memberAuth";
@@ -79,6 +84,7 @@ export default async function HomePage() {
         (e) => e.status === "open",
       )
     : [];
+  const upcomingLock = upcomingData ? voteLockState(upcomingData.event) : null;
   // Buổi vừa rồi đã chốt tiền -> dẫn sang trang buổi đó để quét QR
   const payableEvent =
     pastEvent &&
@@ -152,10 +158,11 @@ export default async function HomePage() {
                     guests: myRow?.guests ?? 0,
                     guestNames: myRow?.guestNames ?? null,
                   }}
-                  locked={
-                    upcomingData.event.status === "settled" ||
-                    upcomingData.event.status === "completed"
-                  }
+                  locked={upcomingLock?.locked ?? false}
+                  lockedMessage={upcomingLock?.message}
+                  deadlineLabel={voteDeadlineLabel(
+                    upcomingData.event.eventDate,
+                  )}
                 />
               ) : (
                 <LoginPrompt next="/" />

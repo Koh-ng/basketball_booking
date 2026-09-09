@@ -3,10 +3,12 @@ import { events, members, votes, type Event, type Member } from "@/db/schema";
 import { and, desc, eq, gt, lt, lte, or, sql } from "drizzle-orm";
 import {
   addDays,
+  isPastVoteDeadline,
   remainingSundaysOfMonth,
   upcomingSunday,
   vnTimeHM,
   vnToday,
+  VOTE_LOCK_TIME,
 } from "./dates";
 import { perPersonAmount } from "./money";
 
@@ -54,6 +56,41 @@ export function isEventFinished(ev: Event): boolean {
   const today = vnToday();
   if (ev.eventDate < today) return true;
   return ev.eventDate === today && vnTimeHM() >= ev.endTime;
+}
+
+/** Buổi đã chốt tiền -> vote cũng đóng luôn. */
+function isMoneySettled(ev: Event): boolean {
+  return ev.status === "settled" || ev.status === "completed";
+}
+
+/**
+ * Vote còn mở không, kèm lý do để hiển thị cho thành viên khi đã khoá.
+ * Vote khoá từ 12h trưa hôm trước buổi chơi (thứ 7) trở đi — ai vote đi mà
+ * không đi thì vẫn tính và đóng tiền như thường.
+ */
+export function voteLockState(ev: Event): {
+  locked: boolean;
+  message: string | null;
+} {
+  if (ev.status === "cancelled") {
+    return { locked: true, message: "Buổi này đã hủy, không vote được nữa." };
+  }
+  if (isMoneySettled(ev)) {
+    return {
+      locked: true,
+      message: "Buổi này đã chốt tiền, không vote được nữa.",
+    };
+  }
+  if (isPastVoteDeadline(ev.eventDate)) {
+    return {
+      locked: true,
+      message:
+        `Vote đã khoá lúc ${VOTE_LOCK_TIME.replace(":00", "h")} trưa thứ 7 ` +
+        `(trước buổi chơi 1 ngày). Nếu sau đó bạn tham gia được, vui lòng ` +
+        `nhắn lên group nhé.`,
+    };
+  }
+  return { locked: false, message: null };
 }
 
 export async function getUpcomingEvent(): Promise<Event | null> {
