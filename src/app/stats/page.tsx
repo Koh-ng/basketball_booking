@@ -64,14 +64,14 @@ export default async function StatsPage() {
     })
     .sort((a, b) => b.sessions - a.sessions || a.name.localeCompare(b.name));
 
-  // Cùng số buổi tham gia thì cùng hạng; hạng kế tiếp nhảy qua số người đồng
-  // hạng (VD: 1, 1, 3) để không ai bị xếp thấp hơn người có cùng thành tích.
+  // Cùng số buổi tham gia thì cùng hạng, mốc điểm kế tiếp xuống đúng 1 hạng
+  // (VD: 1, 1, 2, 3) — nhờ vậy bảng luôn có đủ hạng 1/2/3, dù nhiều người
+  // đồng hạng nhất thì vẫn còn hạng nhì và hạng ba để trao 🥈 🥉.
   let prevSessions: number | null = null;
-  let prevRank = 0;
-  const leaderboard = ranked.map((m, i) => {
-    const rank = m.sessions === prevSessions ? prevRank : i + 1;
+  let rank = 0;
+  const leaderboard = ranked.map((m) => {
+    if (m.sessions !== prevSessions) rank += 1;
     prevSessions = m.sessions;
-    prevRank = rank;
     return { ...m, rank };
   });
 
@@ -105,6 +105,9 @@ export default async function StatsPage() {
         )}
         {leaderboard.map((m) => {
           const overThreshold = m.missedCount >= INACTIVE_THRESHOLD_SESSIONS;
+          // Chưa đi buổi nào thì không trao huy chương, chỉ hiện số hạng.
+          const badge =
+            (m.sessions > 0 ? medals[m.rank - 1] : null) ?? `${m.rank}.`;
           return (
             <div
               key={m.id}
@@ -112,7 +115,7 @@ export default async function StatsPage() {
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13.5px] font-semibold text-ink">
-                  {medals[m.rank - 1] ?? `${m.rank}.`} {m.name}
+                  {badge} {m.name}
                 </span>
                 <span className="shrink-0 text-[13px] font-bold text-ink/60">
                   {m.sessions} buổi
