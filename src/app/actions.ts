@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { castVote, getEventById } from "@/lib/events";
+import { castVote, getEventById, voteLockState } from "@/lib/events";
 import { getCurrentMember } from "@/lib/memberAuth";
 
 export async function voteAction(
@@ -16,11 +16,12 @@ export async function voteAction(
     return { ok: false, error: "Bạn cần đăng nhập đúng tên của mình để vote" };
   }
   const event = await getEventById(eventId);
-  if (!event || event.status === "cancelled") {
-    return { ok: false, error: "Buổi không tồn tại hoặc đã hủy" };
+  if (!event) {
+    return { ok: false, error: "Buổi không tồn tại" };
   }
-  if (event.status === "settled" || event.status === "completed") {
-    return { ok: false, error: "Buổi đã chốt tiền, không đổi vote được nữa" };
+  const lock = voteLockState(event);
+  if (lock.locked) {
+    return { ok: false, error: lock.message ?? "Vote đã khoá" };
   }
   const safeGuests = going
     ? Math.min(5, Math.max(0, Math.floor(guests) || 0))

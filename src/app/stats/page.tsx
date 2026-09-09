@@ -43,7 +43,7 @@ export default async function StatsPage() {
 
   // Bảng vàng chuyên cần: xếp theo tổng số buổi tham gia, kèm lần cuối tham
   // gia + số buổi vắng liên tục tính từ đó, để xét luật vắng 4 buổi liên tục.
-  const leaderboard = allMembers
+  const ranked = allMembers
     .filter((m) => m.active)
     .map((m) => {
       const entry = perMember.get(m.id) ?? { sessions: 0 };
@@ -63,6 +63,17 @@ export default async function StatsPage() {
       };
     })
     .sort((a, b) => b.sessions - a.sessions || a.name.localeCompare(b.name));
+
+  // Cùng số buổi tham gia thì cùng hạng; hạng kế tiếp nhảy qua số người đồng
+  // hạng (VD: 1, 1, 3) để không ai bị xếp thấp hơn người có cùng thành tích.
+  let prevSessions: number | null = null;
+  let prevRank = 0;
+  const leaderboard = ranked.map((m, i) => {
+    const rank = m.sessions === prevSessions ? prevRank : i + 1;
+    prevSessions = m.sessions;
+    prevRank = rank;
+    return { ...m, rank };
+  });
 
   const medals = ["🥇", "🥈", "🥉"];
 
@@ -85,14 +96,14 @@ export default async function StatsPage() {
           >
             luật của hội
           </a>
-          .
+          . Ai bằng số buổi tham gia thì đồng hạng với nhau.
         </p>
         {leaderboard.length === 0 && (
           <p className="text-[13px] font-semibold text-ink/50">
             Chưa có dữ liệu.
           </p>
         )}
-        {leaderboard.map((m, i) => {
+        {leaderboard.map((m) => {
           const overThreshold = m.missedCount >= INACTIVE_THRESHOLD_SESSIONS;
           return (
             <div
@@ -101,7 +112,7 @@ export default async function StatsPage() {
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13.5px] font-semibold text-ink">
-                  {medals[i] ?? `${i + 1}.`} {m.name}
+                  {medals[m.rank - 1] ?? `${m.rank}.`} {m.name}
                 </span>
                 <span className="shrink-0 text-[13px] font-bold text-ink/60">
                   {m.sessions} buổi

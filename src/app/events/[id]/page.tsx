@@ -7,8 +7,13 @@ import {
 } from "@/components/PaymentSection";
 import { VotePanel } from "@/components/VotePanel";
 import { googleCalendarUrl } from "@/lib/calendar";
-import { formatDateVN } from "@/lib/dates";
-import { getEventById, getEventVotes, isEventFinished } from "@/lib/events";
+import { formatDateVN, voteDeadlineLabel } from "@/lib/dates";
+import {
+  getEventById,
+  getEventVotes,
+  isEventFinished,
+  voteLockState,
+} from "@/lib/events";
 import { bankInfoFromHost, getEffectiveHost } from "@/lib/hostProfiles";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { formatVND, perPersonAmount } from "@/lib/money";
@@ -38,6 +43,7 @@ export default async function EventDetailPage({
     : 0;
   // Buổi chưa diễn ra và còn mở -> cho vote trước ngay tại đây
   const votable = event.status === "open" && !isEventFinished(event);
+  const lock = voteLockState(event);
 
   // Buổi đã chốt tiền -> hiện QR chuyển khoản ngay tại trang này
   const payable =
@@ -158,7 +164,9 @@ export default async function EventDetailPage({
                 guests: myRow?.guests ?? 0,
                 guestNames: myRow?.guestNames ?? null,
               }}
-              locked={false}
+              locked={lock.locked}
+              lockedMessage={lock.message}
+              deadlineLabel={voteDeadlineLabel(event.eventDate)}
             />
           ) : (
             <LoginPrompt next={`/events/${event.id}`} />

@@ -9,7 +9,7 @@ const RULES = [
   "Hãy cố gắng đảm bảo người bạn dẫn đi cùng sẽ đi, tránh trường hợp không đủ người chơi",
   "Đi lâu dài thì add Facebook, add group trên Messenger",
   "Báo trước nếu không đi thường xuyên hoặc nghỉ hẳn",
-  "Nếu không đi thì nên cập nhật 1 ngày trước buổi chơi, nếu không thì vẫn sẽ tính và đóng tiền",
+  "Voting sẽ khoá vào 12h trưa thứ 7 — trước buổi chơi 1 ngày; nếu vote đi mà không đi thì vẫn sẽ tính và đóng tiền. Nếu có thể tham gia được sau đó vui lòng nhắn lên group",
   "Nếu kẹt không đi thường xuyên được (vắng liên tục từ 4 buổi trở lên), tụi mình xin phép remove khỏi group trước — khi nào đi đều lại được thì add lại ngay, để nhóm luôn active và duy trì sân chơi kỷ luật cho anh em mỗi tuần",
 ];
 
