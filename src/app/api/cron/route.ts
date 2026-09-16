@@ -33,7 +33,7 @@ function emailStatus(result: SendEmailResult): string {
  * Tự quyết định việc theo thứ trong tuần (giờ VN):
  *  - Hàng ngày: đảm bảo tồn tại buổi cho Chủ nhật sắp tới
  *  - Hàng ngày: xoá vĩnh viễn các buổi đã hủy quá 30 ngày
- *  - Thứ 5: email nhắc đặt sân cho buổi Chủ nhật tuần này (kèm tin đặt sân soạn sẵn)
+ *  - Thứ 5: email nhắc admin biết giữ sân hay hủy sân nếu chưa đủ người
  *  - Thứ 6: email nhắc admin đăng tin vote + book sân
  *  - Chủ nhật: email nhắc giờ chơi (8h sáng, chơi lúc 10h)
  *  - Thứ 2: email nhắc ai chưa chuyển tiền buổi vừa rồi + nhắc vote buổi sắp tới
@@ -63,32 +63,38 @@ export async function GET(req: NextRequest) {
   ];
 
   if (weekday === 4) {
-    // Thứ 5: nhắc đặt sân cho buổi Chủ nhật tuần này
+    // Thứ 5: nhắc admin biết giữ sân hay hủy sân cho buổi Chủ nhật tuần này
     const event = await getUpcomingEvent();
     if (event && event.status === "open") {
       const data = await getEventVotes(event);
       const enough = data.headCount >= MIN_PLAYERS;
       const result = await sendAdminEmail(
         adminEmail,
-        `🏀 Nhắc đặt sân — Chủ nhật ${event.eventDate} (${data.headCount} người)`,
+        enough
+          ? `🏀 Đủ người, giữ sân Chủ nhật ${event.eventDate} (${data.headCount} người)`
+          : `⚠️ Chưa đủ người — cân nhắc hủy sân Chủ nhật ${event.eventDate} (${data.headCount}/${MIN_PLAYERS})`,
         [
           `Sắp tới buổi Chủ nhật ${event.eventDate}. Hiện có ${data.headCount} người chốt đi` +
             (data.guestCount > 0 ? ` (gồm ${data.guestCount} khách)` : "") +
             ".",
           enough
-            ? `Đủ người rồi, nhớ đặt sân nhé!`
-            : `⚠️ Chưa đủ ${MIN_PLAYERS} người — thứ 7 app sẽ tự hủy nếu vẫn thiếu.`,
-          ``,
-          `Tin nhắn đặt sân (dán cho admin sân):`,
-          `----------`,
-          courtBookingMessage(event),
+            ? `✅ Đủ tối thiểu ${MIN_PLAYERS} người — giữ sân, nhớ đặt/xác nhận sân nhé!`
+            : `⚠️ Chưa đủ ${MIN_PLAYERS} người — cân nhắc hủy sân. Nếu vẫn thiếu tới trưa thứ 7 (hạn khoá vote), app sẽ tự động hủy buổi.`,
+          ...(enough
+            ? [
+                ``,
+                `Tin nhắn đặt sân (dán cho admin sân):`,
+                `----------`,
+                courtBookingMessage(event),
+              ]
+            : []),
           ``,
           `Chi tiết người tham gia:`,
           `----------`,
           participationSummaryMessage(data),
         ].join("\n"),
       );
-      actions.push(`court booking reminder email: ${emailStatus(result)}`);
+      actions.push(`keep-or-cancel reminder email: ${emailStatus(result)}`);
     }
   }
 
