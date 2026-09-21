@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
             ".",
           enough
             ? `✅ Đủ tối thiểu ${MIN_PLAYERS} người — giữ sân, nhớ đặt/xác nhận sân nhé!`
-            : `⚠️ Chưa đủ ${MIN_PLAYERS} người — cân nhắc hủy sân. Nếu vẫn thiếu tới trưa thứ 7 (hạn khoá vote), app sẽ tự động hủy buổi.`,
+            : `⚠️ Chưa đủ ${MIN_PLAYERS} người — cân nhắc hủy sân. Vote khoá trưa nay (12h trưa thứ 5), sau đó sĩ số không đổi nữa; nếu vẫn thiếu thì sáng thứ 7 app tự động hủy buổi.`,
           ...(enough
             ? [
                 ``,

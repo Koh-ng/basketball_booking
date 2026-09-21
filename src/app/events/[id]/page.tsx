@@ -5,6 +5,7 @@ import {
   PaymentSection,
   type PaymentRowClient,
 } from "@/components/PaymentSection";
+import { VoteLockNotice } from "@/components/VoteLockNotice";
 import { VotePanel } from "@/components/VotePanel";
 import { googleCalendarUrl } from "@/lib/calendar";
 import { formatDateVN, voteDeadlineLabel } from "@/lib/dates";
@@ -150,6 +151,10 @@ export default async function EventDetailPage({
             eventId={event.id}
           />
         </div>
+      )}
+
+      {votable && lock.reason === "deadline" && (
+        <VoteLockNotice deadlineLabel={voteDeadlineLabel(event.eventDate)} />
       )}
 
       {votable && (

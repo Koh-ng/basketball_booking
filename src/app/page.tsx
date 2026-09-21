@@ -1,4 +1,5 @@
 import { LoginPrompt } from "@/components/LoginPrompt";
+import { VoteLockNotice } from "@/components/VoteLockNotice";
 import { VotePanel } from "@/components/VotePanel";
 import Link from "next/link";
 import {
@@ -145,6 +146,12 @@ export default async function HomePage() {
               )}
             </div>
           </div>
+
+          {upcomingLock?.reason === "deadline" && (
+            <VoteLockNotice
+              deadlineLabel={voteDeadlineLabel(upcomingData.event.eventDate)}
+            />
+          )}
 
           {upcomingData.event.status !== "cancelled" && (
             <div className="mt-4">
