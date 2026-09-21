@@ -56,16 +56,22 @@ export function remainingSundaysOfMonth(): string[] {
   return sundays;
 }
 
-/** Giờ khoá vote: 12h trưa hôm trước buổi chơi (thứ 7, vì buổi là Chủ nhật). */
+/** Thứ khoá vote: 4 = thứ 5 (0 = Chủ nhật), tức thứ 5 trước buổi chơi. */
+export const VOTE_LOCK_WEEKDAY = 4;
+
+/** Giờ khoá vote: 12h trưa thứ 5 trước buổi chơi. */
 export const VOTE_LOCK_TIME = "12:00";
 
-/** Ngày khoá vote của một buổi (YYYY-MM-DD) — luôn là hôm trước buổi chơi. */
+/** Ngày khoá vote của một buổi (YYYY-MM-DD): thứ 5 gần nhất trước buổi chơi. */
 export function voteLockDate(eventDate: string): string {
-  return addDays(eventDate, -1);
+  const weekday = new Date(`${eventDate}T00:00:00Z`).getUTCDay();
+  // Buổi rơi đúng thứ 5 thì lùi về thứ 5 tuần trước, không khoá ngay hôm đó.
+  const daysBack = (weekday - VOTE_LOCK_WEEKDAY + 7) % 7 || 7;
+  return addDays(eventDate, -daysBack);
 }
 
 /**
- * Đã quá hạn vote chưa, theo giờ VN: từ 12h trưa hôm trước buổi chơi trở đi.
+ * Đã quá hạn vote chưa, theo giờ VN: từ 12h trưa thứ 5 trước buổi chơi trở đi.
  */
 export function isPastVoteDeadline(eventDate: string): boolean {
   const lockDate = voteLockDate(eventDate);
@@ -123,7 +129,7 @@ export function formatDateTimeVN(date: Date): string {
   }).format(date);
 }
 
-/** "12h trưa Thứ bảy 18/07/2026" — hạn chốt vote hiển thị cho thành viên. */
+/** "12h trưa Thứ năm 16/07/2026" — hạn chốt vote hiển thị cho thành viên. */
 export function voteDeadlineLabel(eventDate: string): string {
   const hour = VOTE_LOCK_TIME.replace(":00", "h");
   return `${hour} trưa ${formatDateVN(voteLockDate(eventDate))}`;

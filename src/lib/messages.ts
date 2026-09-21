@@ -46,7 +46,7 @@ export function voteReminderMessage(data: EventWithVotes): string {
     `📍 ${VENUE.name}: ${VENUE.mapsUrl}`,
     ``,
     `Anh em vào vote để chốt sân nhé: ${appUrl()}`,
-    `🔒 Vote khoá lúc ${voteDeadlineLabel(event.eventDate)} — sau đó vote đi mà không đi thì vẫn tính tiền.`,
+    `🔒 Vote khoá lúc ${voteDeadlineLabel(event.eventDate)} — sau đó vote đi mà không đi thì vẫn tính tiền. Ai đi được hoặc đổi ý sau giờ đó thì nhắn lên group nhé.`,
     ``,
     `✅ Đã chốt đi (${headCount}): ${going.join(", ") || "chưa có ai"}`,
   ];

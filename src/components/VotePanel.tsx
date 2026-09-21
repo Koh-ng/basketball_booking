@@ -30,7 +30,7 @@ export function VotePanel({
   locked: boolean;
   /** Lý do khoá vote, hiện cho thành viên khi `locked`. */
   lockedMessage?: string | null;
-  /** Hạn chốt vote, VD "12h trưa Thứ bảy 18/07" — hiện khi vote còn mở. */
+  /** Hạn chốt vote, VD "12h trưa Thứ năm 16/07" — hiện khi vote còn mở. */
   deadlineLabel?: string | null;
 }) {
   const [pending, startTransition] = useTransition();
@@ -177,9 +177,9 @@ export function VotePanel({
       )}
 
       {!locked && deadlineLabel && (
-        <p className="mt-3 text-[12px] font-semibold text-ink/45">
+        <p className="mt-3 text-[12px] leading-relaxed font-semibold text-ink/45">
           ⏳ Vote khoá lúc {deadlineLabel}. Vote đi mà không đi thì vẫn tính
-          tiền như thường nhé.
+          tiền như thường; đổi ý sau giờ đó thì nhắn lên group nhé.
         </p>
       )}
 

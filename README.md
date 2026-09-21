@@ -4,7 +4,7 @@ Web app cho đội bóng rổ chơi cố định **sáng Chủ nhật 10h–12h*
 
 - **Tự tạo kèo hàng tuần** — mỗi tuần tự động có kèo mới cho Chủ nhật sắp tới
 - **Vote không cần đăng nhập** — thành viên mở link, chọn tên mình, bấm Đi / Không đi
-- **Khoá vote 12h trưa thứ 7** — trước buổi chơi 1 ngày, sau đó không đổi vote được nữa; ai đã vote đi mà không đi thì vẫn tính tiền
+- **Khoá vote 12h trưa thứ 5** — trước buổi chơi, sau đó không đổi vote được nữa; ai đã vote đi mà không đi thì vẫn tính tiền, đi được hoặc đổi ý thì nhắn lên group
 - **Nhắc nhở bán tự động** — hệ thống email cho admin kèm tin nhắn soạn sẵn (thứ 6 nhắc vote + book sân, sáng Chủ nhật nhắc giờ chơi, thứ 3 nhắc thu tiền); trên trang quản lý có nút **Copy tin nhắn** để dán vào group Messenger
 - **Chia tiền & tracking** — admin nhập tổng chi phí, app chia đều (làm tròn lên nghìn đồng), mỗi thành viên thấy số tiền + **mã QR VietQR** đúng số tiền để chuyển khoản; admin tick ai đã chuyển để theo dõi
 

@@ -63,34 +63,46 @@ function isMoneySettled(ev: Event): boolean {
   return ev.status === "settled" || ev.status === "completed";
 }
 
+/** Vì sao vote bị khoá — `deadline` là khoá theo giờ, còn lại là do buổi. */
+export type VoteLockReason = "cancelled" | "settled" | "deadline";
+
+export type VoteLockState = {
+  locked: boolean;
+  reason: VoteLockReason | null;
+  message: string | null;
+};
+
 /**
  * Vote còn mở không, kèm lý do để hiển thị cho thành viên khi đã khoá.
- * Vote khoá từ 12h trưa hôm trước buổi chơi (thứ 7) trở đi — ai vote đi mà
- * không đi thì vẫn tính và đóng tiền như thường.
+ * Vote khoá từ 12h trưa thứ 5 trước buổi chơi trở đi — ai vote đi mà không đi
+ * thì vẫn tính và đóng tiền như thường; đổi ý sau đó thì nhắn lên group.
  */
-export function voteLockState(ev: Event): {
-  locked: boolean;
-  message: string | null;
-} {
+export function voteLockState(ev: Event): VoteLockState {
   if (ev.status === "cancelled") {
-    return { locked: true, message: "Buổi này đã hủy, không vote được nữa." };
+    return {
+      locked: true,
+      reason: "cancelled",
+      message: "Buổi này đã hủy, không vote được nữa.",
+    };
   }
   if (isMoneySettled(ev)) {
     return {
       locked: true,
+      reason: "settled",
       message: "Buổi này đã chốt tiền, không vote được nữa.",
     };
   }
   if (isPastVoteDeadline(ev.eventDate)) {
     return {
       locked: true,
+      reason: "deadline",
       message:
-        `Vote đã khoá lúc ${VOTE_LOCK_TIME.replace(":00", "h")} trưa thứ 7 ` +
-        `(trước buổi chơi 1 ngày). Nếu sau đó bạn tham gia được, vui lòng ` +
-        `nhắn lên group nhé.`,
+        `Vote đã khoá lúc ${VOTE_LOCK_TIME.replace(":00", "h")} trưa thứ 5 ` +
+        `trước buổi chơi. Nếu bạn đi được hoặc đổi ý sau đó, vui lòng nhắn ` +
+        `lên group nhé.`,
     };
   }
-  return { locked: false, message: null };
+  return { locked: false, reason: null, message: null };
 }
 
 export async function getUpcomingEvent(): Promise<Event | null> {
