@@ -49,14 +49,14 @@ export function CreateEventForm({
         <input
           type="time"
           name="startTime"
-          defaultValue="10:00"
+          defaultValue="11:00"
           className="flex-1 rounded-[10px] border border-ink/15 px-3 py-2.5 text-[13px]"
         />
         <span className="text-ink/40">–</span>
         <input
           type="time"
           name="endTime"
-          defaultValue="12:00"
+          defaultValue="13:00"
           className="flex-1 rounded-[10px] border border-ink/15 px-3 py-2.5 text-[13px]"
         />
       </div>

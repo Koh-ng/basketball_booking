@@ -202,8 +202,8 @@ export async function createEventAction(
   const eventDate = String(formData.get("eventDate") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
   const hostIdRaw = String(formData.get("hostId") ?? "");
-  const startTime = String(formData.get("startTime") ?? "").trim() || "10:00";
-  const endTime = String(formData.get("endTime") ?? "").trim() || "12:00";
+  const startTime = String(formData.get("startTime") ?? "").trim() || "11:00";
+  const endTime = String(formData.get("endTime") ?? "").trim() || "13:00";
   if (!eventDate) return { ok: false, error: "Chọn ngày cho buổi mới" };
   if (!TIME_RE.test(startTime) || !TIME_RE.test(endTime)) {
     return { ok: false, error: "Giờ không hợp lệ" };
