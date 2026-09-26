@@ -35,7 +35,7 @@ function emailStatus(result: SendEmailResult): string {
  *  - Hàng ngày: xoá vĩnh viễn các buổi đã hủy quá 30 ngày
  *  - Thứ 5: email nhắc admin biết giữ sân hay hủy sân nếu chưa đủ người
  *  - Thứ 6: email nhắc admin đăng tin vote + book sân
- *  - Chủ nhật: email nhắc giờ chơi (8h sáng, chơi lúc 10h)
+ *  - Chủ nhật: email nhắc giờ chơi (8h sáng, chơi lúc 11h)
  *  - Thứ 2: email nhắc ai chưa chuyển tiền buổi vừa rồi + nhắc vote buổi sắp tới
  *  - Thứ 3: email nhắc thu tiền nếu còn người chưa chuyển khoản
  */

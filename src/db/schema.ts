@@ -37,8 +37,8 @@ export const hostProfiles = pgTable("host_profiles", {
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   eventDate: date("event_date").notNull().unique(),
-  startTime: text("start_time").notNull().default("10:00"),
-  endTime: text("end_time").notNull().default("12:00"),
+  startTime: text("start_time").notNull().default("11:00"),
+  endTime: text("end_time").notNull().default("13:00"),
   status: text("status", {
     enum: ["open", "settled", "completed", "cancelled"],
   })
